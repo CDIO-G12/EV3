@@ -19,7 +19,7 @@ import lejos.utility.Delay;
 import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
 
-public class NetworkComm {
+public class NetworkCommunication {
 
 	private String ip;
 	private int port;
@@ -29,7 +29,7 @@ public class NetworkComm {
 	
 	EV3TouchSensor pooptouch = new EV3TouchSensor(SensorPort.S1);
 	
-	public NetworkComm(String ip, int port) {
+	public NetworkCommunication(String ip, int port) {
 		
 		this.ip = ip;
 		this.port = port;
