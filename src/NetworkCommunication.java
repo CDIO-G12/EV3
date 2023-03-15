@@ -11,11 +11,10 @@ public class NetworkCommunication extends Thread {
 	private int port;
 	private Socket socket; 
 	
-	public NetworkCommunication(String ip, int port, Socket socket) {
+	public NetworkCommunication(String ip, int port) {
 		
 		this.ip = ip;
 		this.port = port;
-		this.socket = socket;
 
 	}
 	
