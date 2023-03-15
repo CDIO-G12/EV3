@@ -1,52 +1,53 @@
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-
-import lejos.hardware.Button;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.motor.EV3MediumRegulatedMotor;
-import lejos.hardware.port.MotorPort;
-import lejos.hardware.port.SensorPort;
-import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.hardware.sensor.SensorMode;
-import lejos.robotics.RegulatedMotor;
-import lejos.utility.Delay;
-import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
 
-public class NetworkCommunication {
+public class NetworkCommunication extends Thread {
 
 	private String ip;
 	private int port;
 	private Socket socket; 
 	
-	public NetworkCommunication(String ip, int port) {
+	public NetworkCommunication(String ip, int port, Socket socket) {
 		
 		this.ip = ip;
 		this.port = port;
+		this.socket = socket;
 
 	}
 	
+	public String readCommand() throws UnknownHostException, IOException {
+		
+		String comArg = "";
+
+		DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+
+		char command = (char) input.readByte();
+		byte argument = input.readByte();
+		
+		comArg = command + " " + argument;
+		
+		LCD.drawString("comArg is: " + comArg, 0, 4);
+		
+		return comArg;
+		
+	}
 	
-	public void NetworkInit() throws UnknownHostException, IOException {
+	private void initNetwork() {
 		
 		try(Socket createSocket = new Socket(ip, port)) {
+			
 			socket = createSocket;
-
-			DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 			
-			LCD.drawString("Welcome", 0, 4);
-			
-		
-		} catch(Exception e) {
-			LCD.drawString("Error Network", 0, 4);
 		}
 		
+		catch(Exception e) {
+		LCD.drawString("Socket Error", 0, 4);
+		} 
+		
 	}
-	
+		
 }
