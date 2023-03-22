@@ -10,36 +10,49 @@ import lejos.hardware.port.SensorPort;
 
 public class Robot {
 
+	/*
+	 * All ports used
+	 */
 	private static final Port leftPort = MotorPort.C;
 	private static final Port rightPort = MotorPort.B;
 	private static final Port harvester = MotorPort.D;
-	private static final Port dump = MotorPort.A;
+	private static final Port dumpMotor = MotorPort.A;
 	private static final Port colorSensor = SensorPort.S3;
+	private static final Port dumpSensor = SensorPort.S1;
 	
+	/*
+	 * TCP communication variables
+	 */
 	private static final int port = 9999;
 	private static final String ip = "192.168.0.102";
+	
+	/*
+	 * Physical sizes on the robot
+	 */
 	private static final float wheelDiameter = 0;
 	private static final float robotDiagonal = 0;
 	
+	/*
+	 * Public objects
+	 */
 	private NetworkCommunication netComm = new NetworkCommunication(ip, port);
 	private MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
-	private PeripheralDevices pd = new PeripheralDevices(harvester, dump);
+	private PeripheralDevices pd = new PeripheralDevices(harvester, dumpMotor, dumpSensor);
 	private Sensors sen = new Sensors(colorSensor);
 	
+	/*
+	 * Variables used for receiving and queuing movement commands
+	 */
 	private boolean newCommand = true;
 	private boolean stop = false;
-	
 	private Queue<String> commandQueue = new LinkedList<String>();
-	
-	public Robot() {
-		
-		
-		
-	}
-
 
 	public void run() throws UnknownHostException, IOException {
 
+		
+		/*
+		 * Create thread that read commands from TCP connection and stores it in the FIFO queue
+		 */
 		Thread tnetwork = new Thread(new Runnable() {
 
 			@Override
@@ -63,6 +76,10 @@ public class Robot {
 			
 		});
 		
+		/*
+		 * Checks if command(s) is present
+		 * If it is we call the appropriate function 
+		 */
 		Thread tHandler = new Thread(new Runnable() {
 
 			@Override
@@ -111,7 +128,7 @@ public class Robot {
 						
 					case "D":
 						if(arg == 1) {
-							pd.dumpBalls(true);
+							pd.dumpBalls();
 						}
 						break;
 						
@@ -127,16 +144,8 @@ public class Robot {
 			
 		});
 		
-		
-		
-		
 		tnetwork.start();
-		
-		
-		
+		tHandler.start();
 		
 	}
-
-	
-	
 }

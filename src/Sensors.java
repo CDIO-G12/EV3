@@ -10,14 +10,21 @@ import lejos.utility.Delay;
 
 public class Sensors implements Runnable {
 	
+	/*
+	 * Private copies of parsed arguments
+	 */
 	private EV3ColorSensor colorSensor;
+	
 	
 	public Sensors(Port colorSensor) {
 	
-	this.colorSensor = new EV3ColorSensor(colorSensor);
+		this.colorSensor = new EV3ColorSensor(colorSensor);
 		
 	}
 		
+	/*
+	 * Reads the different RGB values and returns true if a ball roles past.
+	 */
 	private boolean readColors() {
 			
 		float[] sample = new float[3];

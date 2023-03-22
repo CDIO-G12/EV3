@@ -9,28 +9,37 @@ import lejos.utility.Delay;
 
 public class PeripheralDevices {
 	
+	/*
+	 * Private copies of parsed arguments
+	 */
 	private RegulatedMotor harvester;
 	private RegulatedMotor dumpMotor;
 	private EV3TouchSensor dumpSensor;
-	private EV3ColorSensor colorSensor;
 	private EV3UltrasonicSensor distanceSensor;
 	
 	
-	public PeripheralDevices(Port harvester, Port dump) {
+	public PeripheralDevices(Port harvester, Port dump, Port dumpSensor) {
 		
 		this.harvester = new EV3LargeRegulatedMotor(harvester);
 		this.dumpMotor = new EV3MediumRegulatedMotor(dump);
+		this.dumpSensor = new EV3TouchSensor(dumpSensor);
 		
 	}
 	
+	/*
+	 * Turn on harvester. 1 for forward
+	 */
 	public void harvest(boolean direction) {
-		
-		//hastighed skal sættes
-		harvester.forward();
-		
-		
+		if(direction) {
+			harvester.forward();
+		} else {
+			harvester.backward();
+		}
 	}
 	
+	/*
+	 * Stop harvester
+	 */
 	public void stopHarvest() {
 		
 		harvester.stop();
@@ -38,7 +47,10 @@ public class PeripheralDevices {
 		
 	}
 	
-	public void dumpBalls(boolean activeDump) {
+	/*
+	 * Opens the rear hatch until the dumpTouch sensor is pressed and then closes again.
+	 */
+	public void dumpBalls() {
 	
 		dumpMotor.backward();
 		
@@ -54,30 +66,14 @@ public class PeripheralDevices {
 
 	}
 	
+	/*
+	 * Checks if the dumpSensor is pressed
+	 */
 	public boolean readDumpSensor() {
 		  float[] sample = new float[1];
 		  dumpSensor.getTouchMode().fetchSample(sample, 0);
 		  return sample[0] != 0.0f;
 		  
 	}
-	
-	
-	public void readColors() {
-		
-		colorSensor.getColorID();
-		
-		
-	}
-	
-	
-	
-	
-	public void getDistance() {
-		
-	}
-	
-	
-	
-	
 	
 }
