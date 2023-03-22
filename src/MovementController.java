@@ -1,28 +1,26 @@
 
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.robotics.RegulatedMotor;
 
-public class MovementController {
+public class MovementController extends Thread{
 
+	/*
+	 * Private copies of parsed arguments
+	 */
 	private float wheelSize;
 	private float wheelDistance;
 	private RegulatedMotor left;
 	private RegulatedMotor right;
-	private RegulatedMotor harvester;
 	
-	private float wheelRadius;
-	private float wheelDistanceRadius;
-	private float wheelCircumference;
-	private float robotCircumference;
-	
+	/*
+	 * Calculated variables
+	 */
 	private float turnConversion;
 	private float distancePrDegree;
 	
-	
-	
+	// Constructor. Creates motors and setup synchronization between the motors.
 	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
 		
 		this.wheelSize = wheelSize;
@@ -37,44 +35,28 @@ public class MovementController {
 		
 	}
 	
-	public MovementController(float wheelSize, float wheelDistance, RegulatedMotor left, RegulatedMotor right,
-			RegulatedMotor harvester) {
-		
-		this.wheelSize = wheelSize;
-		this.wheelDistance = wheelDistance;
-		this.left = left;
-		this.right = right;
-		this.harvester = harvester;
-		
-		setupVariables();
-		
-	}
-	
+	// Uses the sizes of the wheels to calculate the degrees turned
+	// on the wheels to a degree turned for the whole robot
 	private void setupVariables() {
 
 		// Variables for the small wheel
-		wheelRadius = wheelSize/2;
-		wheelCircumference = (float) (wheelRadius * Math.PI * 2);
+		float wheelRadius = wheelSize/2;
+		float wheelCircumference = (float) (wheelRadius * Math.PI * 2);
 		
 		// Variables for the robot as a whole
-		wheelDistanceRadius = wheelDistance / 2;
-		robotCircumference = (float) (wheelDistanceRadius * Math.PI * 2);
+		float wheelDistanceRadius = wheelDistance / 2;
+		float robotCircumference = (float) (wheelDistanceRadius * Math.PI * 2);
 		
 		// How far the robot turns when asked to turn 1 degree
 		distancePrDegree = wheelCircumference/360;
 		
-
-		// TODO: Currently set, needs to be changed to a calculation. 
-		// Means 6.444 turns the robot 1 degree
-		// turnConversion = 6.444f;
 		turnConversion = robotCircumference / wheelCircumference;
-		
 		
 	}
 	
 	
 	/*
-	 * Takes the input argument (in millimeters) and moves that distance.
+	 * Takes the input argument (in millimeters) and moves that distance forward.
 	 */
 	public void moveForward(int Distance) {
 		
@@ -87,7 +69,9 @@ public class MovementController {
 		
 	}
 	
-	
+	/*
+	 * Takes the input argument (in millimeters) and moves that distance backward.
+	 */
 	public void moveBackward(int Distance) {
 		
 		int degreesToTurn = (int) -(distancePrDegree / Distance);
@@ -99,6 +83,9 @@ public class MovementController {
 		
 	}
 	
+	/*
+	 * Takes the input argument (in degrees) and turn right that amount
+	 */
 	public void turnRight(int degrees) {
 		
 		int totalDegrees = (int) (degrees * turnConversion);
@@ -110,6 +97,9 @@ public class MovementController {
 		
 	}
 	
+	/*
+	 * Takes the input argument (in degrees) and turn left that amount
+	 */
 	public void turnLeft(int degrees) {
 		
 		int totalDegrees = (int) (degrees * turnConversion);
@@ -121,12 +111,30 @@ public class MovementController {
 		
 	}
 	
+	/*
+	 * Stops the robot
+	 */
+	public void stopMovement() {
+		
+		left.startSynchronization();
+		left.rotate(0);
+		right.rotate(0);
+		left.endSynchronization();
+		
+	}
+	
+	/*
+	 * Returns true or false if the robot is moving
+	 */
 	public boolean isMoving() {
 		
 		return (left.isMoving() || right.isMoving());
 		
 	}
 	
+	/*
+	 * Returns true or false if the motors are stalled
+	 */
 	public boolean isStalled() {
 		
 		return (left.isStalled() || right.isStalled());
