@@ -1,4 +1,4 @@
-import lejos.hardware.lcd.LCD;
+/*import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.MotorPort;
@@ -36,6 +36,7 @@ public class NetworkHandler {
 		  return sample[0] != 0.0f;
 		  
 	}
+	
 	
 	RegulatedMotor left = new EV3LargeRegulatedMotor(MotorPort.C);
 	RegulatedMotor right = new EV3LargeRegulatedMotor(MotorPort.B);
@@ -121,3 +122,4 @@ public class NetworkHandler {
 	pooptouch.close();
 	
 }
+*/
