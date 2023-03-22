@@ -24,6 +24,7 @@ public class Robot {
 	private NetworkCommunication netComm = new NetworkCommunication(ip, port);
 	private MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
 	private PeripheralDevices pd = new PeripheralDevices(harvester, dump);
+	private Sensors sen = new Sensors(colorSensor);
 	
 	private boolean newCommand = true;
 	private boolean stop = false;
