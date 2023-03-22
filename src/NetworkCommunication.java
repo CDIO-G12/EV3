@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import lejos.hardware.lcd.LCD;
 
-public class NetworkCommunication extends Thread {
+public class NetworkCommunication {
 
 	private String ip;
 	private int port;

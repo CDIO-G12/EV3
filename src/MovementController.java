@@ -1,17 +1,15 @@
 
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.robotics.RegulatedMotor;
 
-public class MovementController {
+public class MovementController extends Thread{
 
 	private float wheelSize;
 	private float wheelDistance;
 	private RegulatedMotor left;
 	private RegulatedMotor right;
-	private RegulatedMotor harvester;
 	
 	private float wheelRadius;
 	private float wheelDistanceRadius;
@@ -20,8 +18,6 @@ public class MovementController {
 	
 	private float turnConversion;
 	private float distancePrDegree;
-	
-	
 	
 	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
 		
@@ -44,7 +40,6 @@ public class MovementController {
 		this.wheelDistance = wheelDistance;
 		this.left = left;
 		this.right = right;
-		this.harvester = harvester;
 		
 		setupVariables();
 		
@@ -68,7 +63,6 @@ public class MovementController {
 		// Means 6.444 turns the robot 1 degree
 		// turnConversion = 6.444f;
 		turnConversion = robotCircumference / wheelCircumference;
-		
 		
 	}
 	
@@ -117,6 +111,15 @@ public class MovementController {
 		left.startSynchronization();
 		left.rotate(totalDegrees);
 		right.rotate(-totalDegrees);
+		left.endSynchronization();
+		
+	}
+	
+	public void stopMovement() {
+		
+		left.startSynchronization();
+		left.rotate(0);
+		right.rotate(0);
 		left.endSynchronization();
 		
 	}
