@@ -15,6 +15,7 @@ public class NetworkCommunication {
 		
 		this.ip = ip;
 		this.port = port;
+		initNetwork();
 
 	}
 	
@@ -22,14 +23,14 @@ public class NetworkCommunication {
 
 		String comArg = "";
 			
-		//Læser data fra middleman og dekrypteres 
+		//Reads data from middleman, then decrypts it 
 		DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 		
-		//Læser bytes fra input
+		//Reads bytes from input 
 		char command = (char) input.readByte();
 		byte argument = input.readByte();
 				
-		//String som indeholder hvilken command der bliver læst
+		//String which holds the command that are being written
 		comArg = command + " " + argument;
 				
 		LCD.drawString("comArg is: " + comArg, 0, 4);
