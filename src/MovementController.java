@@ -53,7 +53,6 @@ public class MovementController {
 		
 	}
 	
-	
 	/*
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
