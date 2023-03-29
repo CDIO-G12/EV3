@@ -48,7 +48,6 @@ public class Robot {
 	private Queue<String> commandQueue = new LinkedList<String>();
 
 	public void run() throws UnknownHostException, IOException {
-
 		
 		/*
 		 * Create thread that read commands from TCP connection and stores it in the FIFO queue
@@ -99,19 +98,19 @@ public class Robot {
 					switch(commands[0]) {
 						
 					case "F":
-						moveCon.moveForward(arg);
+						moveCon.moveForward((byte) arg);
 						break;
 					
 					case "B":
-						moveCon.moveBackward(arg);
+						moveCon.moveBackward((byte) arg);
 						break;
 					
 					case "L":
-						moveCon.turnLeft(arg);
+						moveCon.turnLeft((byte) arg);
 						break;
 						
 					case "R":
-						moveCon.turnRight(arg);
+						moveCon.turnRight((byte) arg);
 						break;
 						
 					case "S":
@@ -133,7 +132,7 @@ public class Robot {
 						break;
 						
 					case "Z":
-						moveCon.stopMovement();
+						moveCon.stop();
 						pd.stopHarvest();
 						commandQueue.clear();
 					}

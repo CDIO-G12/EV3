@@ -27,16 +27,16 @@ public class Sensors implements Runnable {
 	 */
 	private boolean readColors() {
 			
+		//float sample, bliver lavet til at gemme rgb værdierne
+		
 		float[] sample = new float[3];
+				
+		//getRGBMode giver 3 values mellem 0-255, læser intensiteten af red, green og blue light
 		colorSensor.getRGBMode().fetchSample(sample, 0);
-		
-		LCD.drawInt(((int) (sample[0]*100)), 0, 0);
-		LCD.drawInt(((int) (sample[1]*100)), 0, 1);
-		LCD.drawInt(((int) (sample[2]*100)), 0, 2);
-		
-		
+				
 		Delay.msDelay(500);
-		
+				
+		//Returner hvis alle rgb værdierne er over 50 
 		return (sample[0] >= 0.5 && sample[1] >= 0.5 && sample[2] >= 0.5);
 			
 	}

@@ -19,20 +19,22 @@ public class NetworkCommunication {
 	}
 	
 	public String readCommand() throws UnknownHostException, IOException {
-		
+
 		String comArg = "";
-
+			
+		//Læser data fra middleman og dekrypteres 
 		DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-
+		
+		//Læser bytes fra input
 		char command = (char) input.readByte();
 		byte argument = input.readByte();
-		
+				
+		//String som indeholder hvilken command der bliver læst
 		comArg = command + " " + argument;
-		
+				
 		LCD.drawString("comArg is: " + comArg, 0, 4);
-		
+				
 		return comArg;
-		
 	}
 	
 	private void initNetwork() {
