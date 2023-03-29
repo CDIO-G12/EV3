@@ -1,7 +1,4 @@
-
-
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.robotics.RegulatedMotor;
 
@@ -11,7 +8,6 @@ public class MovementController {
 	private float wheelDistance;
 	private RegulatedMotor left;
 	private RegulatedMotor right;
-	private RegulatedMotor harvester;
 	
 	private float wheelRadius;
 	private float wheelDistanceRadius;
@@ -39,19 +35,6 @@ public class MovementController {
 		
 	}
 	
-	public MovementController(float wheelSize, float wheelDistance, RegulatedMotor left, RegulatedMotor right,
-			RegulatedMotor harvester) {
-		
-		this.wheelSize = wheelSize;
-		this.wheelDistance = wheelDistance;
-		this.left = left;
-		this.right = right;
-		this.harvester = harvester;
-		
-		setupVariables();
-		
-	}
-	
 	private void setupVariables() {
 
 		// Variables for the small wheel
@@ -66,11 +49,7 @@ public class MovementController {
 		distancePrDegree = wheelCircumference/360;
 		
 
-		// TODO: Currently set, needs to be changed to a calculation. 
-		// Means 6.444 turns the robot 1 degree
-		// turnConversion = 6.444f;
 		turnConversion = robotCircumference / wheelCircumference;
-		
 		
 	}
 	
@@ -114,6 +93,9 @@ public class MovementController {
 		
 	}
 	
+	/*
+	 * Takes input in degrees and turns to the desired side
+	 */
 	public void turnRight(byte degrees) {
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
@@ -137,6 +119,9 @@ public class MovementController {
 		
 	}
 	
+	/*
+	 * Stops motors
+	 */
 	public void stop() {
 		left.startSynchronization();
 		left.stop();
@@ -144,18 +129,27 @@ public class MovementController {
 		left.endSynchronization();
 	}
 	
+	/*
+	 * Returns true of the robot is moving
+	 */
 	public boolean isMoving() {
 		
 		return (left.isMoving() || right.isMoving());
 		
 	}
 	
+	/*
+	 * Returns true if either of the motors are stalled
+	 */
 	public boolean isStalled() {
 		
 		return (left.isStalled() || right.isStalled());
 		
 	}
 	
+	/*
+	 * Close motors
+	 */
 	public void close() {
 		this.left.close();
 		this.right.close();

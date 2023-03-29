@@ -9,7 +9,7 @@ public class main {
 	
 	public static void main(String[] args) throws UnknownHostException, IOException {
 
-		
+		// Create Robot object
 		Robot robot = new Robot();
 		robot.run();
 		

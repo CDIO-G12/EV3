@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
-
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
@@ -27,7 +26,7 @@ public class Robot {
 	private static final String ip = "192.168.0.102";
 	
 	/*
-	 * Physical sizes on the robot
+	 * Physical sizes on the robot in millimeters
 	 */
 	private static final float wheelDiameter = 0;
 	private static final float robotDiagonal = 0;
@@ -43,9 +42,9 @@ public class Robot {
 	/*
 	 * Variables used for receiving and queuing movement commands
 	 */
-	private boolean newCommand = true;
+	private boolean newCommand = false;
 	private boolean stop = false;
-	private Queue<String> commandQueue = new LinkedList<String>();
+	private Queue<String> commandQueue = new LinkedList<>();
 
 	public void run() throws UnknownHostException, IOException {
 		
@@ -86,31 +85,31 @@ public class Robot {
 				
 				String[] commands = new String[2];
 				String currentCommand = "";
-				int arg = 0;
+				byte arg = 0;
 				
-				while(newCommand) {
+				while(newCommand || !stop || !moveCon.isMoving()) {
 					
 					currentCommand = commandQueue.poll();
 					commands = currentCommand.split(" ");
-					arg = Integer.parseInt(commands[1]);
+					arg = Byte.valueOf(commands[1]);
 					
 					
 					switch(commands[0]) {
 						
 					case "F":
-						moveCon.moveForward((byte) arg);
+						moveCon.moveForward(arg);
 						break;
 					
 					case "B":
-						moveCon.moveBackward((byte) arg);
+						moveCon.moveBackward(arg);
 						break;
 					
 					case "L":
-						moveCon.turnLeft((byte) arg);
+						moveCon.turnLeft(arg);
 						break;
 						
 					case "R":
-						moveCon.turnRight((byte) arg);
+						moveCon.turnRight(arg);
 						break;
 						
 					case "S":
