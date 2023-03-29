@@ -1,10 +1,5 @@
-import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.Port;
-import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.hardware.sensor.EV3UltrasonicSensor;
-import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
 
@@ -27,16 +22,15 @@ public class Sensors implements Runnable {
 	 */
 	private boolean readColors() {
 			
-		//float sample, bliver lavet til at gemme rgb værdierne
-		
+		//float sample, made for saving the rgb values 
 		float[] sample = new float[3];
 				
-		//getRGBMode giver 3 values mellem 0-255, læser intensiteten af red, green og blue light
+		//getRGBMode gives 3 values betweem 0-255, reads the intensity of red, green og blue light
 		colorSensor.getRGBMode().fetchSample(sample, 0);
 				
 		Delay.msDelay(500);
 				
-		//Returner hvis alle rgb værdierne er over 50 
+		//Returns if all rgb values are over 50 
 		return (sample[0] >= 0.5 && sample[1] >= 0.5 && sample[2] >= 0.5);
 			
 	}
