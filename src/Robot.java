@@ -12,12 +12,13 @@ public class Robot {
 	/*
 	 * All ports used
 	 */
-	private static final Port leftPort = MotorPort.C;
-	private static final Port rightPort = MotorPort.B;
-	private static final Port harvester = MotorPort.D;
-	private static final Port dumpMotor = MotorPort.A;
-	private static final Port colorSensor = SensorPort.S3;
-	private static final Port dumpSensor = SensorPort.S1;
+	private static final Port leftPort = MotorPort.B;
+	private static final Port rightPort = MotorPort.C;
+	private static final Port openCloseGrapper = MotorPort.D;
+	private static final Port upDownGrapper = MotorPort.A;
+	private static final Port distanceSesnor = SensorPort.S1;
+	private static final Port colorSensor = SensorPort.S2;
+	private static final Port dumpSensor = SensorPort.S4;
 	
 	/*
 	 * TCP communication variables
@@ -28,15 +29,15 @@ public class Robot {
 	/*
 	 * Physical sizes on the robot in millimeters
 	 */
-	private static final float wheelDiameter = 0;
-	private static final float robotDiagonal = 0;
+	private static final float wheelDiameter = 43.2f;
+	private static final float robotDiagonal = 100f;
 	
 	/*
 	 * Public objects
 	 */
 	private NetworkCommunication netComm = new NetworkCommunication(ip, port);
 	private MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
-	private PeripheralDevices pd = new PeripheralDevices(harvester, dumpMotor, dumpSensor);
+	private PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, dumpSensor);
 	private Sensors sen = new Sensors(colorSensor);
 	
 	/*
