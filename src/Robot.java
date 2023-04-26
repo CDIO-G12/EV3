@@ -77,114 +77,114 @@ public class Robot {
 				boolean orange = true;
 				
 				while(!stop) {
-					if(newCommand) {
-						
-						currentCommand = commandQueue.poll();
-						commands = currentCommand.split(" ");
-						arg = Byte.valueOf(commands[1]);
-						
-						
-						switch(commands[0]) {
-							
-						case "F":
-							moveCon.moveForward(arg);
-							break;
-						
-						case "f":
-							moveCon.moveForwardFine(arg);
-							break;
-							
-						case "B":
-							moveCon.moveBackward(arg);
-							break;
-						
-						case "L":
-							moveCon.turnLeft(arg);
-							break;
-							
-						case "R":
-							moveCon.turnRight(arg);
-							break;
-							
-						case "S":
-							if(arg == -1) {
-								// Skal testes 
-								pd.downGrapper();
-								moveCon.moveForwardFine((byte) 10);
-								while(moveCon.isMoving());
-								pd.closeGrapper();
-								pd.upGrapper();
-							}
-							break;
-						
-						case "G":
-							if(arg == 1) {
-								pd.closeGrapper();
-							} else {
-								pd.openGrapper();
-							}
-							break;
-							
-						case "A":
-							if(arg == 1) {
-								pd.upGrapper();
-							} else {
-								pd.downGrapper();
-							}
-							break;
-							
-						case "D":
-							if(arg == -1 || true) {
-								pd.poop();
-							}
-							break;
-							
-						case "Z":
-							if(arg == -1) {
-								moveCon.emStop();
-								pd.stopPeripherals();
-								commandQueue.clear();
-							}
-						case "T":
-							if(arg == -1 || true) {
-								orange = (arg == 1);
-								// Skal testes 
-								pd.downGrapper();
-								while(moveCon.isMoving());
-								pd.closeGrapper();
-								pd.upGrapper();
-								
-								Delay.msDelay(1000);
-								
-								if(sen.readColors(orange)) {
-									Sound.beep();
-									pd.openGrapper();
-									outputQueue.add("gb");
-								}
-								else {
-									pd.downGrapper();
-									pd.openGrapper();
-									pd.upGrapper();
-								}
-								
-								
-							}
-							break;
-						}
-					
-						newCommand = false;
-						
+					if(!newCommand) {
+						continue;
 					}
+						
+					currentCommand = commandQueue.poll();
+					commands = currentCommand.split(" ");
+					arg = Byte.valueOf(commands[1]);
 					
-					if(isMoving != moveCon.isMoving()) {
-						isMoving = moveCon.isMoving();
+					
+					switch(commands[0]) {
 						
-						if(isMoving) {
-							outputQueue.add("m");
-						} else {
-							outputQueue.add("fm");
+					case "F":
+						moveCon.moveForward(arg);
+						break;
+					
+					case "f":
+						moveCon.moveForwardFine(arg);
+						break;
+						
+					case "B":
+						moveCon.moveBackward(arg);
+						break;
+					
+					case "L":
+						moveCon.turnLeft(arg);
+						break;
+						
+					case "R":
+						moveCon.turnRight(arg);
+						break;
+						
+					case "S":
+						if(arg == -1) {
+							// Skal testes 
+							pd.downGrapper();
+							moveCon.moveForwardFine((byte) 10);
+							while(moveCon.isMoving());
+							pd.closeGrapper();
+							pd.upGrapper();
 						}
+						break;
+					
+					case "G":
+						if(arg == 1) {
+							pd.closeGrapper();
+						} else {
+							pd.openGrapper();
+						}
+						break;
 						
+					case "A":
+						if(arg == 1) {
+							pd.upGrapper();
+						} else {
+							pd.downGrapper();
+						}
+						break;
+						
+					case "D":
+						if(arg == -1 || true) {
+							pd.poop();
+						}
+						break;
+						
+					case "Z":
+						if(arg == -1) {
+							moveCon.emStop();
+							pd.stopPeripherals();
+							commandQueue.clear();
+						}
+					case "T":
+						if(arg == -1 || true) {
+							orange = (arg == 1);
+							// Skal testes 
+							pd.downGrapper();
+							while(moveCon.isMoving());
+							pd.closeGrapper();
+							pd.upGrapper();
+							
+							Delay.msDelay(1000);
+							
+							if(sen.readColors(orange)) {
+								Sound.beep();
+								pd.openGrapper();
+								outputQueue.add("gb");
+							}
+							else {
+								pd.downGrapper();
+								pd.openGrapper();
+								pd.upGrapper();
+							}
+							
+							
+						}
+						break;
+					}
+				
+					newCommand = false;
+						
+				}
+				
+				if(isMoving != moveCon.isMoving()) {
+					isMoving = moveCon.isMoving();
+					
+					if(isMoving) {
+						outputQueue.add("m");
+					} else {
+						outputQueue.add("fm");
 					}
 				}
 			}
@@ -197,58 +197,65 @@ public class Robot {
 
 		/*
 		 * Create thread that read commands from TCP connection and stores it in the FIFO queue
-		 */
-		try(Socket socket = new Socket(ip, port)) {
+		 */DataInputStream input = null;
+			DataOutputStream output = null;
 			
-			//Reads data from middleman, then decrypts it 
-			DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			try(Socket socket = new Socket(ip, port)) {
+				
+				//Reads data from middleman, then decrypts it 
+				input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+				output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+				
+			} catch(Exception e) {
+				LCD.clear();
+				LCD.drawString("Socket Error", 0, 2);
+				LCD.drawString("Fix error",0,4);
+				LCD.drawString("and restart", 0, 5);
+				while(true);
+			}
 			
 			String comArg = "";
 			byte argument = 0;
 			boolean validCommand = false;
 			
 			outputQueue.add("rd");
+				
 			
 			while(!stop) {
-				if (input.available() > 0) {
-					//Reads bytes from input 
-					char command = (char) input.readByte();
-					/*for(int i = 0; i < validCommands.length; i++) {
-						if(command != validCommands[i]) {
-							validCommand = false;
-							break;
-						} else {
-							validCommand = true;
-						}
-					}
-					
-					if(!validCommand) {
-						continue;
-					}
-					*/
-					argument = input.readByte();
-					
-					//String which holds the command that are being written
-					comArg = command + " " + argument;
-							
-					LCD.drawString("comArg is: " + comArg, 0, 4);
-	
-					commandQueue.add(comArg);
-					newCommand = true;
+				if (input.available() < 0 || input == null) {
+					continue;
 				}
 				
-				if(!outputQueue.isEmpty()) {
-					output.writeBytes(outputQueue.poll());
-					output.flush();
+				//Reads bytes from input 
+				char command = (char) input.readByte();
+				argument = input.readByte();
+				
+				for(int i = 0; i < validCommands.length; i++) {
+					if(validCommands[i] == command) {
+						validCommand = true;
+						break;
+					} else {
+						validCommand = false;
+					}
 				}
-			}
+				
+				if(!validCommand) {
+					continue;
+				}
+				
+				//String with command and argument
+				comArg = command + " " + argument;
+						
+				LCD.drawString("comArg is: " + comArg, 0, 4);
+
+				commandQueue.add(comArg);
+				newCommand = true;
+				validCommand = false;
+				}
 			
-		}
-		catch(Exception e) {
-		System.out.print(e);
-		LCD.drawString("Socket Error", 0, 4);
-		} 
-		
+			if(!outputQueue.isEmpty()) {
+				output.writeBytes(outputQueue.poll());
+				output.flush();
+			}
 	}
 }
