@@ -3,6 +3,7 @@ import java.net.UnknownHostException;
 
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
+import lejos.utility.Delay;
 
 public class main {
 
@@ -12,7 +13,6 @@ public class main {
 		// Create Robot object
 		Robot robot = new Robot();
 		robot.run();
-		
 		
 
 	}

@@ -17,6 +17,7 @@ public class MovementController {
 	private float turnConversion;
 	private float distancePrDegree;
 	
+	private int standardAcc = 500;
 	
 	
 	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
@@ -26,8 +27,8 @@ public class MovementController {
 		
 		this.left = new EV3LargeRegulatedMotor(left);
 		this.right = new EV3LargeRegulatedMotor(right);
-		this.left.setAcceleration(250);
-		this.right.setAcceleration(250);
+		this.left.setAcceleration(standardAcc);
+		this.right.setAcceleration(standardAcc);
 		
 		this.left.synchronizeWith(new RegulatedMotor[] {this.right});
 		
@@ -61,8 +62,8 @@ public class MovementController {
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(-degreesToTurn);
-		right.rotate(-degreesToTurn);
+		left.rotate(degreesToTurn);
+		right.rotate(degreesToTurn);
 		left.endSynchronization();
 		
 	}
@@ -75,8 +76,8 @@ public class MovementController {
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(-degreesToTurn*255);
-		right.rotate(-degreesToTurn*255);
+		left.rotate(degreesToTurn*255);
+		right.rotate(degreesToTurn*255);
 		left.endSynchronization();
 		
 	}
@@ -86,8 +87,8 @@ public class MovementController {
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn);
-		right.rotate(degreesToTurn);
+		left.rotate(-degreesToTurn);
+		right.rotate(-degreesToTurn);
 		left.endSynchronization();
 		
 	}
@@ -126,6 +127,19 @@ public class MovementController {
 		left.stop();
 		right.stop();
 		left.endSynchronization();
+	}
+	
+	public void emStop() {
+		left.setAcceleration(10000);
+		right.setAcceleration(10000);
+		
+		left.startSynchronization();
+		left.stop();
+		right.stop();
+		left.endSynchronization();
+		
+		this.left.setAcceleration(standardAcc);
+		this.right.setAcceleration(standardAcc);
 	}
 	
 	/*

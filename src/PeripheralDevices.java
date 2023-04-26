@@ -1,3 +1,6 @@
+import javax.management.openmbean.OpenDataException;
+
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -12,68 +15,107 @@ public class PeripheralDevices {
 	/*
 	 * Private copies of parsed arguments
 	 */
-	private RegulatedMotor harvester;
-	private RegulatedMotor dumpMotor;
-	private EV3TouchSensor dumpSensor;
+	private RegulatedMotor openCloseGrapper;
+	private RegulatedMotor upDownGrapper;
+	private EV3TouchSensor downSensor;
 	private EV3UltrasonicSensor distanceSensor;
 	
-	
-	public PeripheralDevices(Port harvester, Port dump, Port dumpSensor) {
+	public PeripheralDevices(Port openCloseGrapper, Port upDownGrapper, Port downSensor) {
 		
-		this.harvester = new EV3LargeRegulatedMotor(harvester);
-		this.dumpMotor = new EV3MediumRegulatedMotor(dump);
-		this.dumpSensor = new EV3TouchSensor(dumpSensor);
+		this.openCloseGrapper = new EV3LargeRegulatedMotor(openCloseGrapper);
+		this.upDownGrapper = new EV3MediumRegulatedMotor(upDownGrapper);
+		this.downSensor = new EV3TouchSensor(downSensor);
+		
+		this.openCloseGrapper.setSpeed(150);
+		this.openCloseGrapper.setStallThreshold(4, 13); // Skal højst sandsynligt ændres
+		this.upDownGrapper.setAcceleration(500);
+		this.upDownGrapper.setSpeed(270);
 		
 	}
 	
-	/*
-	 * Turn on harvester. 1 for forward
-	 */
-	public void harvest(boolean direction) {
-		if(direction) {
-			harvester.forward();
-		} else {
-			harvester.backward();
-		}
-	}
-	
-	/*
-	 * Stop harvester
-	 */
-	public void stopHarvest() {
-		
-		harvester.stop();
+	public void calibrateMotors() {
 
-		
-	}
-	
-	/*
-	 * Opens the rear hatch until the dumpTouch sensor is pressed and then closes again.
-	 */
-	public void dumpBalls() {
-	
-		dumpMotor.backward();
-		
-		while(!readDumpSensor()) {
-		
-		}
-		
-		dumpMotor.stop();
-		
+		upDownGrapper.backward();
+		while(!grapperIsDown());
+		upDownGrapper.stop();
+		Delay.msDelay(500);
+		upDownGrapper.rotate(400);
+
 		Delay.msDelay(1000);
 		
-		dumpMotor.rotate(330);
+		this.openCloseGrapper.setStallThreshold(4, 13);
+		openCloseGrapper.forward();
+		while(!openCloseGrapper.isStalled());
+		openCloseGrapper.stop();
+		
+		Delay.msDelay(500);
 
+		openGrapper();
+		
+		Delay.msDelay(1000);
+
+		Sound.beepSequenceUp();
+		
+		
+	}
+
+	public void closeGrapper() {
+
+		openCloseGrapper.setStallThreshold(8, 13);
+		
+		openCloseGrapper.forward();
+		while(!openCloseGrapper.isStalled());
+		openCloseGrapper.stop();
+		
+		Sound.beepSequenceUp();
+		
 	}
 	
-	/*
-	 * Checks if the dumpSensor is pressed
-	 */
-	public boolean readDumpSensor() {
+	public void openGrapper() {
+		
+		openCloseGrapper.setStallThreshold(5, 1000);
+		
+		openCloseGrapper.rotate(-700);
+		while(openCloseGrapper.isMoving());
+		
+	}
+	
+	public void upGrapper() {
+		
+		upDownGrapper.rotate(450);
+		
+	}
+	
+	public void downGrapper() {
+		
+		upDownGrapper.backward();
+		while(!grapperIsDown());
+		upDownGrapper.stop();
+		
+	}
+	
+	private boolean grapperIsDown() {
+		
 		  float[] sample = new float[1];
-		  dumpSensor.getTouchMode().fetchSample(sample, 0);
+		  downSensor.getTouchMode().fetchSample(sample, 0);
 		  return sample[0] != 0.0f;
-		  
+		
+	}
+	
+	public void stopPeripherals() {
+		
+		upDownGrapper.stop();
+		openCloseGrapper.stop();
+		
+	}
+	
+	public void poop() {
+
+		Sound.beepSequence();
+		upDownGrapper.rotate(500);
+		Delay.msDelay(1000);
+		upDownGrapper.rotate(-500);
+		
 	}
 	
 }

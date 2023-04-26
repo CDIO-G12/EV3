@@ -1,7 +1,13 @@
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
+
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
@@ -17,8 +23,8 @@ public class Robot {
 	private static final Port openCloseGrapper = MotorPort.D;
 	private static final Port upDownGrapper = MotorPort.A;
 	private static final Port distanceSesnor = SensorPort.S1;
-	private static final Port colorSensor = SensorPort.S2;
-	private static final Port dumpSensor = SensorPort.S4;
+	private static final Port colorSensor = SensorPort.S3;
+	private static final Port UpDownSensor = SensorPort.S4;
 	
 	/*
 	 * TCP communication variables
@@ -35,9 +41,9 @@ public class Robot {
 	/*
 	 * Public objects
 	 */
-	private NetworkCommunication netComm = new NetworkCommunication(ip, port);
+	//private NetworkCommunication netComm = new NetworkCommunication(ip, port);
 	private MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
-	private PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, dumpSensor);
+	private PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, UpDownSensor);
 	private Sensors sen = new Sensors(colorSensor);
 	
 	/*
@@ -46,34 +52,10 @@ public class Robot {
 	private boolean newCommand = false;
 	private boolean stop = false;
 	private Queue<String> commandQueue = new LinkedList<>();
-
+	private Queue<String> outputQueue = new LinkedList<>();
+	private char[] validCommands = {'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z'};
+	
 	public void run() throws UnknownHostException, IOException {
-		
-		/*
-		 * Create thread that read commands from TCP connection and stores it in the FIFO queue
-		 */
-		Thread tnetwork = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				String recivedCommand = "";
-
-				try {	
-					while(!stop) {
-						recivedCommand = netComm.readCommand();
-						
-						if(!recivedCommand.equals("")) {
-							commandQueue.add(recivedCommand);
-							newCommand = true;
-						}
-					}
-				} catch (IOException e) {
-					LCD.drawString("Network Error", 0, 4);
-					e.printStackTrace();
-				}
-			}
-			
-		});
 		
 		/*
 		 * Checks if command(s) is present
@@ -88,63 +70,155 @@ public class Robot {
 				String currentCommand = "";
 				byte arg = 0;
 				
-				while(newCommand || !stop || !moveCon.isMoving()) {
-					
-					currentCommand = commandQueue.poll();
-					commands = currentCommand.split(" ");
-					arg = Byte.valueOf(commands[1]);
-					
-					
-					switch(commands[0]) {
+				boolean isMoving = false;
+				
+				while(!stop) {
+					if(newCommand) {
 						
-					case "F":
-						moveCon.moveForward(arg);
-						break;
-					
-					case "B":
-						moveCon.moveBackward(arg);
-						break;
-					
-					case "L":
-						moveCon.turnLeft(arg);
-						break;
+						currentCommand = commandQueue.poll();
+						commands = currentCommand.split(" ");
+						arg = Byte.valueOf(commands[1]);
 						
-					case "R":
-						moveCon.turnRight(arg);
-						break;
 						
-					case "S":
-						if(arg == 0) {
-							pd.stopHarvest();
-						} else {
+						switch(commands[0]) {
+							
+						case "F":
+							moveCon.moveForward(arg);
+							break;
+						
+						case "f":
+							moveCon.moveForwardFine(arg);
+							break;
+							
+						case "B":
+							moveCon.moveBackward(arg);
+							break;
+						
+						case "L":
+							moveCon.turnLeft(arg);
+							break;
+							
+						case "R":
+							moveCon.turnRight(arg);
+							break;
+							
+						case "S":
+							if(arg == -1) {
+								// Skal testes 
+								pd.downGrapper();
+								moveCon.moveForwardFine((byte) 10);
+								while(moveCon.isMoving());
+								pd.closeGrapper();
+								pd.upGrapper();
+							}
+							break;
+						
+						case "G":
 							if(arg == 1) {
-								pd.harvest(true);
+								pd.closeGrapper();
 							} else {
-								pd.harvest(false);
+								pd.openGrapper();
+							}
+							break;
+							
+						case "A":
+							if(arg == 1) {
+								pd.upGrapper();
+							} else {
+								pd.downGrapper();
+							}
+							break;
+							
+						case "D":
+							if(arg == -1) {
+								pd.poop();
+							}
+							break;
+							
+						case "Z":
+							if(arg == -1) {
+								moveCon.emStop();
+								pd.stopPeripherals();
+								commandQueue.clear();
 							}
 						}
-						break;
 						
-					case "D":
-						if(arg == 1) {
-							pd.dumpBalls();
-						}
-						break;
+						newCommand = false;
 						
-					case "Z":
-						moveCon.stop();
-						pd.stopHarvest();
-						commandQueue.clear();
 					}
 					
-					newCommand = false;
+					if(isMoving != moveCon.isMoving()) {
+						isMoving = moveCon.isMoving();
+						
+						if(isMoving) {
+							outputQueue.add("m");
+						} else {
+							outputQueue.add("fm");
+						}
+						
+					}
+				}
+			}
+		});
+		
+		//tnetwork.start();
+		tHandler.start();
+		
+		LCD.drawString("Running", 0, 0);
+
+		/*
+		 * Create thread that read commands from TCP connection and stores it in the FIFO queue
+		 */
+		try(Socket socket = new Socket(ip, port)) {
+			
+			//Reads data from middleman, then decrypts it 
+			DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			
+			String comArg = "";
+			byte argument = 0;
+			boolean validCommand = false;
+			
+			outputQueue.add("rd");
+			
+			while(!stop) {
+				if (input.available() > 0) {
+					//Reads bytes from input 
+					char command = (char) input.readByte();
+					for(int i = 0; i < validCommands.length; i++) {
+						if(command != validCommands[i]) {
+							validCommand = false;
+							break;
+						} else {
+							validCommand = true;
+						}
+					}
+					
+					if(!validCommand) {
+						continue;
+					}
+					
+					argument = input.readByte();
+					
+					//String which holds the command that are being written
+					comArg = command + " " + argument;
+							
+					LCD.drawString("comArg is: " + comArg, 0, 4);
+	
+					commandQueue.add(comArg);
+					newCommand = true;
+				}
+				
+				if(!outputQueue.isEmpty()) {
+					output.writeBytes(outputQueue.poll());
+					output.flush();
 				}
 			}
 			
-		});
-		
-		tnetwork.start();
-		tHandler.start();
+		}
+		catch(Exception e) {
+		LCD.drawString("Socket Error", 0, 4);
+		} 
 		
 	}
 }
