@@ -73,21 +73,22 @@ public class PeripheralDevices {
 	
 	public void openGrapper() {
 		
-		openCloseGrapper.setStallThreshold(5, 1000);
-		
-		openCloseGrapper.rotate(-700);
-		while(openCloseGrapper.isMoving());
+		openCloseGrapper.setStallThreshold(5, 250);
+		openCloseGrapper.rotate(-800);
+		while(openCloseGrapper.isMoving() && !openCloseGrapper.isStalled());
+		openCloseGrapper.stop();
 		
 	}
 	
 	public void upGrapper() {
-		
-		upDownGrapper.rotate(450);
+		openCloseGrapper.flt();
+		upDownGrapper.rotate(550);
+		while(upDownGrapper.isMoving());
 		
 	}
 	
 	public void downGrapper() {
-		
+		openCloseGrapper.flt();
 		upDownGrapper.backward();
 		while(!grapperIsDown());
 		upDownGrapper.stop();

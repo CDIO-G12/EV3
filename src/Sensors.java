@@ -1,3 +1,4 @@
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.utility.Delay;
@@ -20,18 +21,25 @@ public class Sensors implements Runnable {
 	/*
 	 * Reads the different RGB values and returns true if a ball roles past.
 	 */
-	private boolean readColors() {
-			
+	public boolean readColors(boolean orange) {
+		
 		//float sample, made for saving the rgb values 
 		float[] sample = new float[3];
 				
 		//getRGBMode gives 3 values betweem 0-255, reads the intensity of red, green og blue light
 		colorSensor.getRGBMode().fetchSample(sample, 0);
-				
-		Delay.msDelay(500);
-				
-		//Returns if all rgb values are over 50 
-		return (sample[0] >= 0.5 && sample[1] >= 0.5 && sample[2] >= 0.5);
+		
+		LCD.clear();
+		LCD.drawString("R: " + sample[0] * 100, 0, 2);
+		LCD.drawString("G: " + sample[1] * 100, 0, 3);
+		LCD.drawString("B: " + sample[2] * 100, 0, 4);
+		
+		if(orange) {
+			return (sample[0] < 0.1 && sample[1] >= 0.04 && sample[2] >= 0.1);
+		}
+		
+		//Returns if all rgb values are over 0,5, which means it should be a white ball
+		return (sample[0] >= 0.08 && sample[1] >= 0.08 && sample[2] >= 0.08);
 			
 	}
 
@@ -39,7 +47,7 @@ public class Sensors implements Runnable {
 	public void run() {
 
 		while(true) {
-			readColors();
+			readColors(false);
 		}
 		
 	}	

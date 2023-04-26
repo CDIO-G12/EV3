@@ -8,10 +8,12 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.hardware.port.SensorPort;
+import lejos.utility.Delay;
 
 public class Robot {
 
@@ -42,18 +44,18 @@ public class Robot {
 	 * Public objects
 	 */
 	//private NetworkCommunication netComm = new NetworkCommunication(ip, port);
-	private MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
-	private PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, UpDownSensor);
-	private Sensors sen = new Sensors(colorSensor);
+	private final MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter, robotDiagonal);
+	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, UpDownSensor);
+	private final Sensors sen = new Sensors(colorSensor);
 	
 	/*
 	 * Variables used for receiving and queuing movement commands
 	 */
 	private boolean newCommand = false;
 	private boolean stop = false;
-	private Queue<String> commandQueue = new LinkedList<>();
-	private Queue<String> outputQueue = new LinkedList<>();
-	private char[] validCommands = {'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z'};
+	private final Queue<String> commandQueue = new LinkedList<>();
+	private final Queue<String> outputQueue = new LinkedList<>();
+	private final char[] validCommands = {'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z'};
 	
 	public void run() throws UnknownHostException, IOException {
 		
@@ -71,6 +73,8 @@ public class Robot {
 				byte arg = 0;
 				
 				boolean isMoving = false;
+
+				boolean orange = true;
 				
 				while(!stop) {
 					if(newCommand) {
@@ -130,7 +134,7 @@ public class Robot {
 							break;
 							
 						case "D":
-							if(arg == -1) {
+							if(arg == -1 || true) {
 								pd.poop();
 							}
 							break;
@@ -141,8 +145,33 @@ public class Robot {
 								pd.stopPeripherals();
 								commandQueue.clear();
 							}
+						case "T":
+							if(arg == -1 || true) {
+								orange = (arg == 1);
+								// Skal testes 
+								pd.downGrapper();
+								while(moveCon.isMoving());
+								pd.closeGrapper();
+								pd.upGrapper();
+								
+								Delay.msDelay(1000);
+								
+								if(sen.readColors(orange)) {
+									Sound.beep();
+									pd.openGrapper();
+									outputQueue.add("gb");
+								}
+								else {
+									pd.downGrapper();
+									pd.openGrapper();
+									pd.upGrapper();
+								}
+								
+								
+							}
+							break;
 						}
-						
+					
 						newCommand = false;
 						
 					}
@@ -185,7 +214,7 @@ public class Robot {
 				if (input.available() > 0) {
 					//Reads bytes from input 
 					char command = (char) input.readByte();
-					for(int i = 0; i < validCommands.length; i++) {
+					/*for(int i = 0; i < validCommands.length; i++) {
 						if(command != validCommands[i]) {
 							validCommand = false;
 							break;
@@ -197,7 +226,7 @@ public class Robot {
 					if(!validCommand) {
 						continue;
 					}
-					
+					*/
 					argument = input.readByte();
 					
 					//String which holds the command that are being written
@@ -217,6 +246,7 @@ public class Robot {
 			
 		}
 		catch(Exception e) {
+		System.out.print(e);
 		LCD.drawString("Socket Error", 0, 4);
 		} 
 		
