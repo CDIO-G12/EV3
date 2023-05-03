@@ -27,7 +27,7 @@ public class PeripheralDevices {
 		this.downSensor = new EV3TouchSensor(downSensor);
 
 		this.openCloseGrapper.setSpeed(150);
-		this.openCloseGrapper.setStallThreshold(4, 13); // Skal højst sandsynligt ændres
+		this.openCloseGrapper.setStallThreshold(3, 13); // Skal højst sandsynligt ændres
 		this.upDownGrapper.setAcceleration(500);
 		this.upDownGrapper.setSpeed(270);
 
@@ -44,7 +44,7 @@ public class PeripheralDevices {
 
 		Delay.msDelay(1000);
 
-		this.openCloseGrapper.setStallThreshold(3, 13);
+		this.openCloseGrapper.setStallThreshold(4, 13);
 		openCloseGrapper.forward();
 		while (!openCloseGrapper.isStalled())
 			;
@@ -62,7 +62,7 @@ public class PeripheralDevices {
 
 	public void closeGrapper() {
 
-		openCloseGrapper.setStallThreshold(8, 13);
+		openCloseGrapper.setStallThreshold(6, 13);
 
 		openCloseGrapper.forward();
 		while (!openCloseGrapper.isStalled())
