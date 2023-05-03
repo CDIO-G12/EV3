@@ -18,6 +18,7 @@ public class MovementController {
 	private float distancePrDegree;
 	
 	private int standardAcc = 500;
+	private int defaultSpeed = 720;
 	
 	
 	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
@@ -140,6 +141,17 @@ public class MovementController {
 		
 		this.left.setAcceleration(standardAcc);
 		this.right.setAcceleration(standardAcc);
+	}
+	
+	public void setSpeed(int speed) {
+		left.setSpeed(speed);
+		right.setSpeed(speed);
+	}
+	
+	public void resetSpeed() {
+		left.setSpeed(defaultSpeed);
+		right.setSpeed(defaultSpeed);
+		
 	}
 	
 	/*

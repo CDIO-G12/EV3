@@ -55,9 +55,9 @@ public class Robot {
 	 */
 	private boolean newCommand = false;
 	private boolean stop = false;
-	private final Queue<String> commandQueue = new LinkedList<>();
-	private final Queue<String> outputQueue = new LinkedList<>();
-	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T'};
+	private Queue<String> commandQueue = new LinkedList<>();
+	private Queue<String> outputQueue = new LinkedList<>();
+	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T' };
 
 	public void run() throws UnknownHostException, IOException {
 
@@ -73,15 +73,30 @@ public class Robot {
 				String currentCommand = "";
 				byte arg = 0;
 
-				boolean isMoving = false;
+				boolean isMoving = moveCon.isMoving();
 				boolean orange = true;
 
 				while (!stop) {
+					if (isMoving != moveCon.isMoving()) {
+						isMoving = moveCon.isMoving();
+
+						if (isMoving) {
+							outputQueue.add("m");
+						} else {
+							outputQueue.add("fm");
+						}
+					}
+					
 					if (!newCommand) {
 						continue;
 					}
 
 					currentCommand = commandQueue.poll();
+					
+					
+					if(currentCommand == null) {
+						continue;
+					}
 					commands = currentCommand.split(" ");
 					arg = Byte.valueOf(commands[1]);
 
@@ -136,9 +151,8 @@ public class Robot {
 						break;
 
 					case "D":
-						if (arg == -1 || true) {
-							pd.poop();
-						}
+						pd.poop(arg);
+						outputQueue.add("fd");
 						break;
 
 					case "Z":
@@ -147,6 +161,7 @@ public class Robot {
 							pd.stopPeripherals();
 							commandQueue.clear();
 						}
+						break;
 					case "T":
 						if (arg == 0 || arg == 1) {
 							// Check if ball is supposed to be orange
@@ -155,7 +170,10 @@ public class Robot {
 							// (All pd calls are blocking)
 							// Move arm down, close around ball, move back up.
 							pd.downGrapper();
+							moveCon.setSpeed(100);
+							moveCon.moveForwardFine((byte) 40);
 							pd.closeGrapper();
+							moveCon.resetSpeed();
 							pd.upGrapper();
 
 							Delay.msDelay(200);
@@ -171,20 +189,11 @@ public class Robot {
 								outputQueue.add("gb");
 							}
 						}
+						break;
 					}
-
+					
 					newCommand = false;
 
-				}
-
-				if (isMoving != moveCon.isMoving()) {
-					isMoving = moveCon.isMoving();
-
-					if (isMoving) {
-						outputQueue.add("m");
-					} else {
-						outputQueue.add("fm");
-					}
 				}
 			}
 		});
@@ -196,92 +205,83 @@ public class Robot {
 		 * Create thread that read commands from TCP connection and stores it in the
 		 * FIFO queue
 		 */
-		
-		DataInputStream input = null;
-		DataOutputStream output = null;
 
-		while(true) {
-			
+		while (true) {
+
 			// Try connecting to MM
 			try (Socket socket = new Socket(ip, port)) {
-	
 				// Setup input and output stream
-				input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-				output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-	
-			} catch (Exception e) {
+				DataInputStream input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+
+				// Set default values
+				String comArg = "";
+				byte argument = 0;
+				char command = 0;
+				boolean validCommand = false;
+
+				// Send ready command to MM
+				outputQueue.add("rd");
+				LCD.clear();
+				LCD.drawString("Running", 0, 0);
+
+				while (!stop) {
+					// Send contents of output queue.
+					if (!outputQueue.isEmpty()) {
+						String poll = outputQueue.poll();
+						LCD.drawString(poll, 0, 5);
+						output.writeBytes(poll);
+						output.flush();
+						continue;
+					}
+
+					// Check a command has been sent
+					if (input == null || input.available() <= 0) {
+						continue;
+					}
+
+					// Try reading command and argument from TCP
+					command = (char) input.readByte();
+					argument = input.readByte();
+
+					// Checks if the read command is valid.
+					for (int i = 0; i < validCommands.length; i++) {
+						if (validCommands[i] == command) {
+							validCommand = true;
+							break;
+						} else {
+							validCommand = false;
+						}
+					}
+
+					// If command is not valid check loop condition.
+					if (!validCommand) {
+						continue;
+					}
+
+					// Concatenate command and argument.
+					comArg = command + " " + argument;
+
+					// Write command to LCD display.
+					LCD.drawString("comArg is: " + comArg, 0, 4);
+
+					// Set flags and add command to command queue.
+					newCommand = true;
+					validCommand = false;
+					commandQueue.add(comArg);
+				}
+
+			} catch (IOException e) {
+				moveCon.emStop();
+				pd.stopPeripherals();
+				commandQueue.clear();
+
 				// Keep trying to reconnect to MM
 				LCD.clear();
 				LCD.drawString("Socket Error", 0, 2);
 				LCD.drawString("Waiting for MM", 0, 3);
 				Delay.msDelay(500);
 				continue;
-			}
-	
-			// Set default values
-			String comArg = "";
-			byte argument = 0;
-			char command = 0;
-			boolean validCommand = false;
-	
-			// Send ready command to MM
-			outputQueue.add("rd");
-			LCD.drawString("Running", 0, 0);
-	
-			while (!stop) {
-				// Check a command has been sent
-				if (input.available() < 0 || input == null) {
-					continue;
-				}
-	
-				// Try reading command and argument from TCP
-				try {
-					command = (char) input.readByte();
-					argument = input.readByte();
-				} catch (Exception e) {
-					// Break out from the loop if connection terminates. 
-					// Tries to reconnect to MM and re initializes variables.
-					break;
-				}
-	
-				// Checks if the read command is valid. 
-				for (int i = 0; i < validCommands.length; i++) {
-					if (validCommands[i] == command) {
-						validCommand = true;
-						break;
-					} else {
-						validCommand = false;
-					}
-				}
-				
-				// If command is not valid check loop condition.
-				if (!validCommand) {
-					continue;
-				}
-	
-				// Concatenate command and argument. 
-				comArg = command + " " + argument;
-	
-				// Write command to LCD display.
-				LCD.drawString("comArg is: " + comArg, 0, 4);
-	
-				// Set flags and add command to command queue. 
-				newCommand = true;
-				validCommand = false;
-				commandQueue.add(comArg);
-				
-				// Send contents of output queue.
-				if (!outputQueue.isEmpty()) {
-					try {
-						output.writeBytes(outputQueue.poll());
-						output.flush();
-					} catch(Exception e) {
-						// Breaks from inner loop and tries to reestablish TCP connection.
-						LCD.clear();
-						LCD.drawString("Output Error", 0, 3);
-						break;
-					}
-				}
 			}
 		}
 	}
