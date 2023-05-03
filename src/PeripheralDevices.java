@@ -94,7 +94,7 @@ public class PeripheralDevices {
 		upDownGrapper.stop();
 		
 	}
-	
+
 	private boolean grapperIsDown() {
 		
 		  float[] sample = new float[1];
