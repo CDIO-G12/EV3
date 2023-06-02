@@ -27,7 +27,8 @@ public class Robot {
 	// Unused sensor
 	// private static final Port distanceSesnor = SensorPort.S1;
 	private static final Port colorSensor = SensorPort.S3;
-	private static final Port UpDownSensor = SensorPort.S4;
+	private static final Port upDownSensor = SensorPort.S4;
+	//private static final Port gyro = SensorPort.S1;
 
 	/*
 	 * TCP communication variables
@@ -47,7 +48,7 @@ public class Robot {
 	// private NetworkCommunication netComm = new NetworkCommunication(ip, port);
 	private final MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter,
 			robotDiagonal);
-	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, UpDownSensor);
+	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, upDownSensor);
 	private final Sensors sen = new Sensors(colorSensor);
 
 	/*
@@ -171,7 +172,7 @@ public class Robot {
 							// Move arm down, close around ball, move back up.
 							pd.downGrapper();
 							moveCon.setSpeed(100);
-							moveCon.moveForwardFine((byte) 40);
+							moveCon.moveForwardFine((byte) 80);
 							pd.closeGrapper();
 							moveCon.resetSpeed();
 							pd.upGrapper();
@@ -179,6 +180,8 @@ public class Robot {
 							Delay.msDelay(200);
 
 							// Check if color is supposed to be orange
+							
+							/*
 							if (sen.readColors(orange)) {
 								Sound.beepSequenceUp();
 								pd.openGrapper();
@@ -188,6 +191,12 @@ public class Robot {
 								pd.openGrapper();
 								outputQueue.add("gb");
 							}
+							*/
+							
+							// set got ball
+							pd.openGrapper();
+							outputQueue.add("gb");
+							
 						}
 						break;
 					}
@@ -284,5 +293,159 @@ public class Robot {
 				continue;
 			}
 		}
+	}
+
+	public void test() {
+
+		//pd.openGrapper();
+		
+		int i = 0;
+		while(i < 10) {
+		
+		for(int j = 0; j < 2; j++) {
+			pd.downGrapper();
+			
+			Delay.msDelay(100);
+			
+			pd.closeGrapper();
+			
+			Delay.msDelay(100);
+			
+			pd.upGrapper();
+			
+			Delay.msDelay(200);
+			
+			pd.openGrapper();
+			
+			i++;
+		}
+		
+		pd.poop((byte) 2);
+		
+		}
+		
+	}
+	
+	public void test2() {
+
+		boolean orange = true;
+		
+		pd.downGrapper();
+		
+		pd.closeGrapper();
+		
+		
+		
+		pd.upGrapper();
+
+		if(sen.readColors(false)) {
+			
+			LCD.drawString("No ball", 0, 5);
+			Sound.buzz();
+			
+		}
+		
+		pd.openGrapper();
+		
+		pd.poop((byte) 1);
+
+
+		
+		
+	}
+	
+	public void test3() {
+		
+		boolean orange = true;
+		
+		while(true) {
+
+			if(sen.readColors(orange)) {
+				
+				LCD.drawString("Orange", 0, 5);
+				
+			} else {
+				
+				LCD.drawString("White", 0, 5);
+				
+			}
+			
+			Delay.msDelay(1000);
+			
+		}
+		
+		
+	}
+	
+	public void fullDump() {
+		
+		moveCon.setAcc(3000);
+
+		moveCon.turnLeft((byte) 20);
+		Delay.msDelay(250);
+		moveCon.turnRight((byte) 20);
+		
+		moveCon.resetAcc();
+		
+		pd.poop((byte) 4);
+		
+	}
+	
+	public void sequenceTest() {
+		
+		pd.downGrapper();
+		
+		moveCon.setSpeed(100);
+		moveCon.moveForwardFine((byte) 80);
+		moveCon.resetSpeed();
+		
+		pd.closeGrapper();
+		
+		pd.upGrapper();
+		
+		if(sen.readColors(false)) {
+			
+			LCD.drawString("No ball", 0, 5);
+			Sound.buzz();
+			
+		}
+		
+		pd.openGrapper();
+		
+		
+	}
+	
+public void sequenceTestCorner() {
+		
+		pd.downGrapper();
+		
+		moveCon.setSpeed(100);
+		moveCon.moveForwardFine((byte) 80);
+		moveCon.resetSpeed();
+		
+		pd.closeGrapper();
+		
+		moveCon.moveBackward((byte) 100);
+		
+		
+		
+		pd.upGrapper();
+		
+		if(sen.readColors(false)) {
+			
+			LCD.drawString("No ball", 0, 5);
+			Sound.buzz();
+			
+		}
+		
+		pd.openGrapper();
+		
+		
+	}
+	
+	public void poop() {
+		
+		pd.poop((byte) 1);
+		
 	}
 }

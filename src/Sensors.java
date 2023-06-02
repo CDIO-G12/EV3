@@ -1,6 +1,7 @@
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.utility.Delay;
 
 
@@ -35,11 +36,11 @@ public class Sensors implements Runnable {
 		LCD.drawString("B: " + sample[2] * 100, 0, 4);
 		
 		if(orange) {
-			return (sample[0] < 0.1 && sample[1] >= 0.04 && sample[2] >= 0.1);
+			return (sample[0] <= 2.4 && sample[1] <= 2.4 && sample[2] <= 10);
 		}
 		
 		//Returns if all rgb values are over 0,5, which means it should be a white ball
-		return (sample[0] >= 0.08 && sample[1] >= 0.08 && sample[2] >= 0.08);
+		return (sample[0] <= 0.015 && sample[1] <= 0.015 && sample[2] <= 0.015);
 			
 	}
 

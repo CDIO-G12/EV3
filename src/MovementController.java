@@ -154,6 +154,16 @@ public class MovementController {
 		
 	}
 	
+	public void setAcc(int acc) {
+		left.setAcceleration(acc);
+		right.setAcceleration(acc);
+	}
+	
+	public void resetAcc() {
+		left.setAcceleration(defaultSpeed);
+		right.setAcceleration(defaultSpeed);
+	}
+	
 	/*
 	 * Returns true of the robot is moving
 	 */

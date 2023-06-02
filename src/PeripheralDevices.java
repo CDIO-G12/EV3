@@ -19,6 +19,12 @@ public class PeripheralDevices {
 	private RegulatedMotor upDownGrapper;
 	private EV3TouchSensor downSensor;
 	private EV3UltrasonicSensor distanceSensor;
+	
+	private int openCloseDefaultSpeed = 150;
+	private int upDownDefaultSpeed = 270;	
+	private int openCloseDefaultAcc = 6000;
+	private int upDownDefaultAcc = 500;
+	
 
 	public PeripheralDevices(Port openCloseGrapper, Port upDownGrapper, Port downSensor) {
 
@@ -26,18 +32,16 @@ public class PeripheralDevices {
 		this.upDownGrapper = new EV3MediumRegulatedMotor(upDownGrapper);
 		this.downSensor = new EV3TouchSensor(downSensor);
 
-		this.openCloseGrapper.setSpeed(150);
-		this.openCloseGrapper.setStallThreshold(3, 13); // Skal højst sandsynligt ændres
-		this.upDownGrapper.setAcceleration(500);
-		this.upDownGrapper.setSpeed(270);
+		this.openCloseGrapper.setSpeed(openCloseDefaultSpeed);
+		this.upDownGrapper.setAcceleration(upDownDefaultAcc);
+		this.upDownGrapper.setSpeed(upDownDefaultSpeed);
 
 	}
 
 	public void calibrateMotors() {
 
 		upDownGrapper.backward();
-		while (!grapperIsDown())
-			;
+		while (!grapperIsDown());
 		upDownGrapper.stop();
 		Delay.msDelay(500);
 		upDownGrapper.rotate(400);
@@ -62,7 +66,7 @@ public class PeripheralDevices {
 
 	public void closeGrapper() {
 
-		openCloseGrapper.setStallThreshold(6, 13);
+		openCloseGrapper.setStallThreshold(5, 25);
 
 		openCloseGrapper.forward();
 		while (!openCloseGrapper.isStalled())
@@ -72,31 +76,67 @@ public class PeripheralDevices {
 		Sound.beepSequenceUp();
 
 	}
+	
+	public void openGrapperLittle() {
+		
+		openCloseGrapper.setAcceleration(500);
+		openCloseGrapper.setSpeed(720);
+		
+		openCloseGrapper.rotate(-300);
+		
+		resetOpenCloseAcc();
+		resetOpenCloseSpeed();
+		
+	}
 
 	public void openGrapper() {
 
+		
+		openCloseGrapper.setAcceleration(1000);
+		openCloseGrapper.setSpeed(720);
 		openCloseGrapper.setStallThreshold(5, 250);
-		openCloseGrapper.rotate(-800);
-		while (openCloseGrapper.isMoving() && !openCloseGrapper.isStalled())
-			;
-		openCloseGrapper.stop();
+		openCloseGrapper.rotate(-1000);
+		
+		resetOpenCloseAcc();
+		resetOpenCloseSpeed();
 
 	}
 
 	public void upGrapper() {
-		openCloseGrapper.flt();
-		upDownGrapper.rotate(550);
-		while (upDownGrapper.isMoving())
-			;
 
+		// Change speed to match rotation duration
+		openCloseGrapper.setSpeed(90);
+		upDownGrapper.setSpeed(360);
+		
+		openCloseGrapper.flt();
+		Delay.msDelay(10);
+		
+		openCloseGrapper.rotate(-150, true);
+		upDownGrapper.rotate(550);		
+		while (upDownGrapper.isMoving());
+		
+		// Reset speed
+		resetOpenCloseSpeed();
+		resetUpDownSpeed();
+		
+		
 	}
 
 	public void downGrapper() {
 		openCloseGrapper.flt();
+		
+		upDownGrapper.setSpeed(150);
+		upDownGrapper.setStallThreshold(50, 250);
+		
 		upDownGrapper.backward();
-		while (!grapperIsDown())
-			;
+		while (!grapperIsDown() && !upDownGrapper.isStalled());
 		upDownGrapper.stop();
+		
+		upDownGrapper.setStallThreshold(70, 1000);
+		upDownGrapper.rotate(-150);
+		upDownGrapper.setStallThreshold(50, 1000);
+		
+		resetUpDownSpeed();
 
 	}
 
@@ -124,6 +164,30 @@ public class PeripheralDevices {
 			upDownGrapper.rotate(-500);
 		}
 
+	}
+	
+	private void resetUpDownSpeed() {
+		
+		upDownGrapper.setSpeed(upDownDefaultSpeed);
+		
+	}
+	
+	private void resetUpDownAcc() {
+		
+		upDownGrapper.setAcceleration(upDownDefaultAcc);
+		
+	}
+	
+	private void resetOpenCloseSpeed() {
+		
+		openCloseGrapper.setSpeed(openCloseDefaultSpeed);
+		
+	}
+	
+	private void resetOpenCloseAcc() {
+		
+		upDownGrapper.setAcceleration(upDownDefaultAcc);
+		
 	}
 
 }
