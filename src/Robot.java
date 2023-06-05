@@ -164,51 +164,31 @@ public class Robot {
 						}
 						break;
 					case "T":
-						if(arg == 0) {
+						if(arg == 1) {
+							pd.cornerCalibrate();
+						}
 							
-							pd.downGrapper();
-							moveCon.setSpeed(80);
-							moveCon.moveForwardFine((byte) 170);
-							pd.closeGrapper();
-							moveCon.stop();
-							while(moveCon.isMoving());
-							moveCon.resetSpeed();
-							pd.upGrapper();
+						pd.downGrapper();
+						moveCon.setSpeed(80);
+						moveCon.moveForwardFine((byte) 170);
+						pd.closeGrapper();
+						moveCon.stop();
+						while(moveCon.isMoving());
+						moveCon.resetSpeed();
+						pd.upGrapper();
 
-							// Check for ball twice
-							if(!sen.checkBall()) {
-								outputQueue.add("nb");
-							} else {
-								pd.openGrapper();
-								outputQueue.add("gb");
-							}
-							
+						// Check for ball twice
+						if(!sen.checkBall()) {
+							outputQueue.add("nb");
+						} else {
 							pd.openGrapper();
-							
+							outputQueue.add("gb");
 						}
 						
-						if(arg == 1) {
-
-							pd.cornerCalibrate();
-							pd.downGrapper();
-							moveCon.setSpeed(80);
-							moveCon.moveForwardFine((byte) 170);
-							pd.closeGrapper();
-							moveCon.stop();
-							while(moveCon.isMoving());
-							moveCon.resetSpeed();
-							pd.upGrapper();
-
-							if(!sen.checkBall()) {
-								outputQueue.add("nb");
-							} else {
-								outputQueue.add("gb");
-							}
-							
-							pd.openGrapper();
-						}
+						pd.openGrapper();
 						
 						break;
+						
 					}
 					
 					newCommand = false;
