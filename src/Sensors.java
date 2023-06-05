@@ -5,13 +5,13 @@ import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.utility.Delay;
 
 
-public class Sensors implements Runnable {
+public class Sensors {
 	
 	/*
 	 * Private copies of parsed arguments
 	 */
 	private EV3ColorSensor colorSensor;
-	
+	private double cutoffValue = 0.015;
 	
 	public Sensors(Port colorSensor) {
 	
@@ -22,7 +22,7 @@ public class Sensors implements Runnable {
 	/*
 	 * Reads the different RGB values and returns true if a ball roles past.
 	 */
-	public boolean readColors(boolean orange) {
+	public boolean readColors() {
 		
 		//float sample, made for saving the rgb values 
 		float[] sample = new float[3];
@@ -35,22 +35,9 @@ public class Sensors implements Runnable {
 		LCD.drawString("G: " + sample[1] * 100, 0, 3);
 		LCD.drawString("B: " + sample[2] * 100, 0, 4);
 		
-		if(orange) {
-			return (sample[0] <= 2.4 && sample[1] <= 2.4 && sample[2] <= 10);
-		}
-		
 		//Returns if all rgb values are over 0,5, which means it should be a white ball
-		return (sample[0] <= 0.015 && sample[1] <= 0.015 && sample[2] <= 0.015);
+		return (sample[0] >= cutoffValue && sample[1] >= cutoffValue && sample[2] >= cutoffValue);
 			
 	}
-
-	@Override
-	public void run() {
-
-		while(true) {
-			readColors(false);
-		}
-		
-	}	
 		
 }
