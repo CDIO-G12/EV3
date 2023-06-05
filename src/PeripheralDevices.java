@@ -18,7 +18,6 @@ public class PeripheralDevices {
 	private RegulatedMotor openCloseGrapper;
 	private RegulatedMotor upDownGrapper;
 	private EV3TouchSensor downSensor;
-	private EV3UltrasonicSensor distanceSensor;
 	
 	private int openCloseDefaultSpeed = 150;
 	private int upDownDefaultSpeed = 270;	
@@ -50,8 +49,7 @@ public class PeripheralDevices {
 
 		this.openCloseGrapper.setStallThreshold(4, 13);
 		openCloseGrapper.forward();
-		while (!openCloseGrapper.isStalled())
-			;
+		while (!openCloseGrapper.isStalled());
 		openCloseGrapper.stop();
 
 		Delay.msDelay(500);
@@ -111,22 +109,21 @@ public class PeripheralDevices {
 		openCloseGrapper.flt();
 		Delay.msDelay(10);
 		
-		openCloseGrapper.rotate(-150, true);
+		openCloseGrapper.rotate(-160, true);
 		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		
 		// Reset speed
 		resetOpenCloseSpeed();
 		resetUpDownSpeed();
-		
-		
+			
 	}
 
 	public void downGrapper() {
 		openCloseGrapper.flt();
 		
 		upDownGrapper.setSpeed(150);
-		upDownGrapper.setStallThreshold(50, 250);
+		upDownGrapper.setStallThreshold(70, 250);
 		
 		upDownGrapper.backward();
 		while (!grapperIsDown() && !upDownGrapper.isStalled());
@@ -156,8 +153,6 @@ public class PeripheralDevices {
 	}
 
 	public void poop(byte loop) {
-		Sound.beepSequence();
-
 		for (byte i = 0; i < loop; i++) {
 			upDownGrapper.rotate(500);
 			Delay.msDelay(1000);
@@ -187,6 +182,12 @@ public class PeripheralDevices {
 	private void resetOpenCloseAcc() {
 		
 		upDownGrapper.setAcceleration(upDownDefaultAcc);
+		
+	}
+
+	public void cornerCalibrate() {
+
+		openCloseGrapper.rotate(325);
 		
 	}
 
