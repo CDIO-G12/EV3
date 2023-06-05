@@ -183,7 +183,10 @@ public class Robot {
 								outputQueue.add("gb");
 							}
 							
+							pd.openGrapper();
+							
 						}
+						
 						if(arg == 1) {
 
 							pd.cornerCalibrate();
@@ -203,13 +206,8 @@ public class Robot {
 							}
 							
 							pd.openGrapper();
-							
-							
-							
-							
-							
-							
 						}
+						
 						break;
 					}
 					
