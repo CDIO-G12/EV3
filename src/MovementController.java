@@ -77,8 +77,8 @@ public class MovementController {
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn*255);
-		right.rotate(degreesToTurn*255);
+		left.rotate(degreesToTurn*20);
+		right.rotate(degreesToTurn*20);
 		left.endSynchronization();
 		
 	}

@@ -1,3 +1,4 @@
+import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -11,12 +12,27 @@ public class Sensors {
 	 * Private copies of parsed arguments
 	 */
 	private EV3ColorSensor colorSensor;
+	private EV3GyroSensor gyroSensor;
 	private double cutoffValue = 0.015;
 	
 	public Sensors(Port colorSensor) {
 	
 		this.colorSensor = new EV3ColorSensor(colorSensor);
 		
+	}
+	
+	public boolean checkBall() {
+		
+		if(!readColors()) {
+			Delay.msDelay(1000);
+		}
+		
+		if(!readColors()) {
+			Sound.buzz();
+			return false;
+		}
+		
+		return true;
 	}
 		
 	/*

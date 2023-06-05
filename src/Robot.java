@@ -164,38 +164,50 @@ public class Robot {
 						}
 						break;
 					case "T":
-						if (arg == 0 || arg == 1) {
-							// Check if ball is supposed to be orange
-							orange = (arg == 1);
-
-							// (All pd calls are blocking)
-							// Move arm down, close around ball, move back up.
+						if(arg == 0) {
+							
 							pd.downGrapper();
-							moveCon.setSpeed(100);
-							moveCon.moveForwardFine((byte) 80);
+							moveCon.setSpeed(80);
+							moveCon.moveForwardFine((byte) 170);
 							pd.closeGrapper();
+							moveCon.stop();
+							while(moveCon.isMoving());
 							moveCon.resetSpeed();
 							pd.upGrapper();
 
-							Delay.msDelay(200);
-
-							// Check if color is supposed to be orange
-							
-							/*
-							if (sen.readColors(orange)) {
-								Sound.beepSequenceUp();
-								pd.openGrapper();
-								outputQueue.add("gbo");
+							// Check for ball twice
+							if(!sen.checkBall()) {
+								outputQueue.add("nb");
 							} else {
-								Sound.beep();
 								pd.openGrapper();
 								outputQueue.add("gb");
 							}
-							*/
 							
-							// set got ball
+						}
+						if(arg == 1) {
+
+							pd.cornerCalibrate();
+							pd.downGrapper();
+							moveCon.setSpeed(80);
+							moveCon.moveForwardFine((byte) 170);
+							pd.closeGrapper();
+							moveCon.stop();
+							while(moveCon.isMoving());
+							moveCon.resetSpeed();
+							pd.upGrapper();
+
+							if(!sen.checkBall()) {
+								outputQueue.add("nb");
+							} else {
+								outputQueue.add("gb");
+							}
+							
 							pd.openGrapper();
-							outputQueue.add("gb");
+							
+							
+							
+							
+							
 							
 						}
 						break;
@@ -294,158 +306,45 @@ public class Robot {
 			}
 		}
 	}
-
-	public void test() {
-
-		//pd.openGrapper();
-		
-		int i = 0;
-		while(i < 10) {
-		
-		for(int j = 0; j < 2; j++) {
-			pd.downGrapper();
-			
-			Delay.msDelay(100);
-			
-			pd.closeGrapper();
-			
-			Delay.msDelay(100);
-			
-			pd.upGrapper();
-			
-			Delay.msDelay(200);
-			
-			pd.openGrapper();
-			
-			i++;
-		}
-		
-		pd.poop((byte) 2);
-		
-		}
-		
-	}
 	
-	public void test2() {
-
-		boolean orange = true;
+	
+	public void testCorner() {
+		
+		//pd.poop((byte) 2);
 		
 		pd.downGrapper();
-		
-		pd.closeGrapper();
-		
-		
-		
-		pd.upGrapper();
-
-		if(sen.readColors(false)) {
-			
-			LCD.drawString("No ball", 0, 5);
-			Sound.buzz();
-			
-		}
-		
-		pd.openGrapper();
-		
-		pd.poop((byte) 1);
-
-
-		
-		
-	}
-	
-	public void test3() {
-		
-		boolean orange = true;
-		
-		while(true) {
-
-			if(sen.readColors(orange)) {
-				
-				LCD.drawString("Orange", 0, 5);
-				
-			} else {
-				
-				LCD.drawString("White", 0, 5);
-				
-			}
-			
-			Delay.msDelay(1000);
-			
-		}
-		
-		
-	}
-	
-	public void fullDump() {
-		
-		moveCon.setAcc(3000);
-
-		moveCon.turnLeft((byte) 20);
-		Delay.msDelay(250);
-		moveCon.turnRight((byte) 20);
-		
-		moveCon.resetAcc();
-		
-		pd.poop((byte) 4);
-		
-	}
-	
-	public void sequenceTest() {
-		
-		pd.downGrapper();
-		
-		moveCon.setSpeed(100);
-		moveCon.moveForwardFine((byte) 80);
-		moveCon.resetSpeed();
 		
 		pd.closeGrapper();
 		
 		pd.upGrapper();
 		
-		if(sen.readColors(false)) {
-			
-			LCD.drawString("No ball", 0, 5);
-			Sound.buzz();
-			
-		}
-		
 		pd.openGrapper();
 		
+		Delay.msDelay(2000);
 		
-	}
-	
-public void sequenceTestCorner() {
 		
+		pd.cornerCalibrate();
 		pd.downGrapper();
-		
-		moveCon.setSpeed(100);
-		moveCon.moveForwardFine((byte) 80);
-		moveCon.resetSpeed();
-		
+		moveCon.setSpeed(80);
+		moveCon.moveForwardFine((byte) 200);
 		pd.closeGrapper();
+		moveCon.stop();
 		
 		moveCon.moveBackward((byte) 100);
 		
-		
-		
+		while(moveCon.isMoving());
+		moveCon.resetSpeed();
 		pd.upGrapper();
-		
-		if(sen.readColors(false)) {
-			
-			LCD.drawString("No ball", 0, 5);
+
+		// Check for ball twice
+		if(!sen.checkBall()) {
 			Sound.buzz();
-			
 		}
 		
 		pd.openGrapper();
 		
 		
+		
 	}
 	
-	public void poop() {
-		
-		pd.poop((byte) 1);
-		
-	}
 }

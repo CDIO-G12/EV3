@@ -15,7 +15,7 @@ public class main {
 		
 		// Create Robot object
 		Robot robot = new Robot();
-		robot.sequenceTestCorner();
+		robot.run();
 		
 		
 		
