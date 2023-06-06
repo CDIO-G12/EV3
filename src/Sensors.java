@@ -24,12 +24,12 @@ public class Sensors {
 	public boolean checkBall() {
 		
 		if(!readColors()) {
-			Delay.msDelay(1000);
-		}
-		
-		if(!readColors()) {
-			Sound.buzz();
-			return false;
+			Delay.msDelay(3000);
+			
+			if(!readColors()) {
+				Sound.buzz();
+				return false;
+			}
 		}
 		
 		return true;
@@ -54,6 +54,19 @@ public class Sensors {
 		//Returns if all rgb values are over 0,5, which means it should be a white ball
 		return (sample[0] >= cutoffValue && sample[1] >= cutoffValue && sample[2] >= cutoffValue);
 			
+	}
+	
+	public void readGyro() {
+		
+
+		float[] sample = null;
+		
+		gyroSensor.getAngleMode().fetchSample(sample, 0);
+		
+		LCD.drawString("gyroAngle: " + sample[0]);
+		
+		
+		
 	}
 		
 }

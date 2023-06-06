@@ -28,7 +28,7 @@ public class Robot {
 	// private static final Port distanceSesnor = SensorPort.S1;
 	private static final Port colorSensor = SensorPort.S3;
 	private static final Port upDownSensor = SensorPort.S4;
-	//private static final Port gyro = SensorPort.S1;
+	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
 	 * TCP communication variables
@@ -164,52 +164,34 @@ public class Robot {
 						}
 						break;
 					case "T":
-						if(arg == 0) {
-							
-							pd.downGrapper();
-							moveCon.setSpeed(80);
-							moveCon.moveForwardFine((byte) 170);
-							pd.closeGrapper();
-							moveCon.stop();
-							while(moveCon.isMoving());
-							moveCon.resetSpeed();
-							pd.upGrapper();
-
-							// Check for ball twice
-							if(!sen.checkBall()) {
-								outputQueue.add("nb");
-							} else {
-								pd.openGrapper();
-								outputQueue.add("gb");
-							}
-							
-						}
+						
 						if(arg == 1) {
-
 							pd.cornerCalibrate();
-							pd.downGrapper();
-							moveCon.setSpeed(80);
-							moveCon.moveForwardFine((byte) 170);
-							pd.closeGrapper();
-							moveCon.stop();
-							while(moveCon.isMoving());
-							moveCon.resetSpeed();
-							pd.upGrapper();
-
-							if(!sen.checkBall()) {
-								outputQueue.add("nb");
-							} else {
-								outputQueue.add("gb");
-							}
-							
-							pd.openGrapper();
-							
-							
-							
-							
-							
-							
 						}
+							
+						pd.downGrapper();
+						moveCon.setSpeed(80);
+						moveCon.moveForwardFine((byte) 175);
+						pd.closeGrapper();
+						moveCon.stop();
+						while(moveCon.isMoving());
+						moveCon.resetSpeed();
+						pd.upGrapper();
+
+						// Check for ball twice
+						String tempSave;
+						
+						if(sen.checkBall()) {
+							
+							tempSave = "gb";
+						} else {
+							tempSave = "nb";
+						}
+
+						pd.openGrapper();
+
+						outputQueue.add(tempSave);
+						
 						break;
 					}
 					
