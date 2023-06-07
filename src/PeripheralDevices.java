@@ -1,12 +1,8 @@
-import javax.management.openmbean.OpenDataException;
-
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
@@ -19,17 +15,16 @@ public class PeripheralDevices {
 	private RegulatedMotor upDownGrapper;
 	private EV3TouchSensor downSensor;
 	
-	private int openCloseDefaultSpeed = 150;
+	private int openCloseDefaultSpeed = 750;
 	private int upDownDefaultSpeed = 270;	
 	private int openCloseDefaultAcc = 6000;
 	private int upDownDefaultAcc = 500;
 	
 
-	public PeripheralDevices(Port openCloseGrapper, Port upDownGrapper, Port downSensor) {
+	public PeripheralDevices(Port openCloseGrapper, Port upDownGrapper) {
 
 		this.openCloseGrapper = new EV3LargeRegulatedMotor(openCloseGrapper);
 		this.upDownGrapper = new EV3MediumRegulatedMotor(upDownGrapper);
-		this.downSensor = new EV3TouchSensor(downSensor);
 
 		this.openCloseGrapper.setSpeed(openCloseDefaultSpeed);
 		this.upDownGrapper.setAcceleration(upDownDefaultAcc);
@@ -40,7 +35,7 @@ public class PeripheralDevices {
 	public void calibrateMotors() {
 
 		upDownGrapper.backward();
-		while (!grapperIsDown());
+		while (!upDownGrapper.isStalled());
 		upDownGrapper.stop();
 		Delay.msDelay(500);
 		upDownGrapper.rotate(400);
@@ -63,12 +58,17 @@ public class PeripheralDevices {
 	}
 
 	public void closeGrapper() {
+		
+		int i = 0;
 
-		openCloseGrapper.setStallThreshold(5, 25);
+		openCloseGrapper.setStallThreshold(4, 150); //4, 100
 
 		openCloseGrapper.forward();
-		while (!openCloseGrapper.isStalled())
-			;
+		while (!openCloseGrapper.isStalled() || i <= 1500) {
+			if(i == 2500) break;
+			i++;
+			Delay.msDelay(1);
+		}
 		openCloseGrapper.stop();
 
 		Sound.beepSequenceUp();
@@ -92,8 +92,8 @@ public class PeripheralDevices {
 		
 		openCloseGrapper.setAcceleration(1000);
 		openCloseGrapper.setSpeed(720);
-		openCloseGrapper.setStallThreshold(5, 250);
-		openCloseGrapper.rotate(-1000);
+		openCloseGrapper.setStallThreshold(7, 250);
+		openCloseGrapper.rotate(-1500);
 		
 		resetOpenCloseAcc();
 		resetOpenCloseSpeed();
@@ -109,7 +109,7 @@ public class PeripheralDevices {
 		openCloseGrapper.flt();
 		Delay.msDelay(10);
 		
-		openCloseGrapper.rotate(-160, true);
+		openCloseGrapper.rotate(-165, true);
 		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		
@@ -120,18 +120,12 @@ public class PeripheralDevices {
 	}
 
 	public void downGrapper() {
-		openCloseGrapper.flt();
-		
 		upDownGrapper.setSpeed(150);
-		upDownGrapper.setStallThreshold(70, 250);
+		upDownGrapper.setStallThreshold(70, 100);
 		
 		upDownGrapper.backward();
-		while (!grapperIsDown() && !upDownGrapper.isStalled());
+		while (!upDownGrapper.isStalled());
 		upDownGrapper.stop();
-		
-		upDownGrapper.setStallThreshold(70, 1000);
-		upDownGrapper.rotate(-150);
-		upDownGrapper.setStallThreshold(50, 1000);
 		
 		resetUpDownSpeed();
 

@@ -25,9 +25,9 @@ public class Robot {
 	private static final Port openCloseGrapper = MotorPort.D;
 	private static final Port upDownGrapper = MotorPort.A;
 	// Unused sensor
-	// private static final Port distanceSesnor = SensorPort.S1;
+	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
-	private static final Port upDownSensor = SensorPort.S4;
+	//private static final Port upDownSensor = SensorPort.S2;
 	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
@@ -46,10 +46,10 @@ public class Robot {
 	 * Public objects
 	 */
 	// private NetworkCommunication netComm = new NetworkCommunication(ip, port);
-	private final MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter,
+	private final MovementController moveCon = new MovementController(leftPort, rightPort, gyroSensor, wheelDiameter,
 			robotDiagonal);
-	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, upDownSensor);
-	private final Sensors sen = new Sensors(colorSensor);
+	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper);
+	private final Sensors sen = new Sensors(colorSensor, distanceSesnor);
 
 	/*
 	 * Variables used for receiving and queuing movement commands
@@ -88,6 +88,10 @@ public class Robot {
 						}
 					}
 					
+					if(isMoving) {
+						moveCon.adjustAngle();
+					}
+					
 					if (!newCommand) {
 						continue;
 					}
@@ -104,6 +108,7 @@ public class Robot {
 					switch (commands[0]) {
 
 					case "F":
+						
 						moveCon.moveForward(arg);
 						break;
 
@@ -170,7 +175,7 @@ public class Robot {
 						}
 							
 						pd.downGrapper();
-						moveCon.setSpeed(80);
+						moveCon.setSpeed(100);
 						moveCon.moveForwardFine((byte) 175);
 						pd.closeGrapper();
 						moveCon.stop();
@@ -289,27 +294,77 @@ public class Robot {
 		}
 	}
 	
+	public void pickUpSequence() {
+		
+		for(int i = 0; i < 2; i++) {
+			
+			LCD.drawString("1", 0, 0);
+			pd.downGrapper();
+
+			LCD.drawString("2", 0, 0);
+			moveCon.setSpeed(80);
+			
+
+			LCD.drawString("3", 0, 0);
+			moveCon.moveForwardFine((byte) 250);
+			
+			LCD.drawString("4", 0, 0);
+			pd.closeGrapper();
+			
+			moveCon.stop();
+			
+			moveCon.resetSpeed();
+			
+			pd.upGrapper();
+			
+			if(!sen.checkBall()) {
+				Sound.buzz();
+			} 
+			
+			pd.openGrapper();
+		}
+		
+		pd.poop((byte) 1);
+		
+	}
+	
 	
 	public void testCorner() {
 		
-		//pd.poop((byte) 2);
+		//pd.openGrapper();
+		moveCon.setSpeed(40);
+		moveCon.moveForwardFine((byte) 250);
 		
+		while(sen.readDistance() > 0.25);
+		
+		moveCon.stop();
+
+		pd.cornerCalibrate();
 		pd.downGrapper();
+		
+		Delay.msDelay(1000);
 		
 		pd.closeGrapper();
 		
+		moveCon.resetSpeed();
 		pd.upGrapper();
+		
+		if(!sen.checkBall()) {
+			Sound.buzz();
+		}
 		
 		pd.openGrapper();
 		
-		Delay.msDelay(2000);
 		
-		
+		/*
 		pd.cornerCalibrate();
 		pd.downGrapper();
 		moveCon.setSpeed(80);
 		moveCon.moveForwardFine((byte) 200);
 		pd.closeGrapper();
+		
+		
+		while(sen.readDistance() > 0.19);
 		moveCon.stop();
 		
 		moveCon.moveBackward((byte) 100);
@@ -324,8 +379,28 @@ public class Robot {
 		}
 		
 		pd.openGrapper();
+		*/
+	}
+	
+	public void gyroTest() {
 		
+		moveCon.moveForward((byte) 100);
 		
+		while(moveCon.isMoving()) {
+			
+			moveCon.adjustAngle();
+			
+		}
+	}
+	
+	public void distanceTest() {
+		
+		while(true) {
+			
+			LCD.drawString("Distance: " + sen.readDistance(), 0, 3);
+			Delay.msDelay(200);
+			
+		}
 		
 	}
 	
