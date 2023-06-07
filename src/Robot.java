@@ -56,6 +56,8 @@ public class Robot {
 	 */
 	private boolean newCommand = false;
 	private boolean stop = false;
+	private boolean pickupRunning = false;
+	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
 	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T' };
@@ -63,14 +65,42 @@ public class Robot {
 	public void run() throws UnknownHostException, IOException {
 
 
-		Thread tPickup = new Thread(new Runnable() {
+		final Thread tPickup = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
-			
-			
-			
+				while(true) {
+					while(!startPickup);
+					startPickup = false;
+					
+					pickupRunning = true;
 				
+					pd.upGrapper();
+	
+					// Check for ball twice
+					String tempSave = "nb";
+					int openAmount = -900;
+	
+					pd.resetTachoOpenClose();
+					
+					for(int i = 0; i < 3; i++) {
+	
+						if(sen.readColors()) {
+							tempSave = "gb";
+							Sound.beep();
+							break;	
+						}
+						
+						pd.openGrapperVar(-50, false);
+						
+					}
+					
+					pd.openGrapperVarTo(openAmount, true);
+	
+					outputQueue.add(tempSave);
+					pickupRunning = false;
+				
+				}
 			}
 		});
 
@@ -183,41 +213,24 @@ public class Robot {
 						break;
 					case "T":
 						
+						while(pickupRunning);
+						
 						if(arg == 1) {
 							pd.cornerCalibrate();
 						}
 							
 						pd.downGrapper();
-						moveCon.setSpeed(100);
+						moveCon.setSpeed(150);
 						moveCon.moveForwardFine((byte) 175);
 						pd.closeGrapper();
 						moveCon.stop();
 						while(moveCon.isMoving());
 						moveCon.resetSpeed();
 						//moveCon.moveBackward((byte) 75, true);
-						pd.upGrapper();
 
-						// Check for ball twice
-						String tempSave = "nb";
-						int openAmount = -900;
 
-						pd.resetTachoOpenClose();
-						
-						for(int i = 0; i < 3; i++) {
-	
-							if(sen.readColors()) {
-								tempSave = "gb";
-								Sound.beep();
-								break;	
-							}
-							
-							pd.openGrapperVar(-50, false);
-							
-						}
-						
-						pd.openGrapperVarTo(openAmount, true);
-
-						outputQueue.add(tempSave);
+						outputQueue.add("pb");
+						startPickup = true;
 						
 						break;
 					}
@@ -230,6 +243,7 @@ public class Robot {
 
 		// tnetwork.start();
 		tHandler.start();
+		tPickup.start();
 
 		/*
 		 * Create thread that read commands from TCP connection and stores it in the
