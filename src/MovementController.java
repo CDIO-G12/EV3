@@ -106,14 +106,14 @@ public class MovementController {
 		
 	}
 	
-	public void moveBackward(byte distance) {
+	public void moveBackward(byte distance, boolean imediateReturn) {
 		resetGyro();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(-degreesToTurn);
-		right.rotate(-degreesToTurn);
+		left.rotate(-degreesToTurn, imediateReturn);
+		right.rotate(-degreesToTurn, imediateReturn);
 		left.endSynchronization();
 		
 	}
@@ -126,7 +126,6 @@ public class MovementController {
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 
-		
 		left.startSynchronization();
 		left.rotate(totalDegrees);
 		right.rotate(-totalDegrees);
@@ -213,7 +212,7 @@ public class MovementController {
 		
 		// Read gyro and apply differnce to wheel speed
 		
-		float sample = readGyro();
+		float sample = getGyroAngle();
 		float newSpeed = 0;
 		
 		if(sample == 0) {
@@ -252,12 +251,14 @@ public class MovementController {
 		
 	}
 	
-	public float readGyro() {
-		
+	public float getGyroAngle() {
+
 		float[] sample = new float[1];
-		
+
 		gyroSensor.getAngleMode().fetchSample(sample, 0);
-		
+
+		LCD.drawString("gyroAngle: " + sample[0], 0, 4);
+
 		return sample[0];
 		
 	}

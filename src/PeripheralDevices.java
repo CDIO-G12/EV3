@@ -61,10 +61,14 @@ public class PeripheralDevices {
 		
 		int i = 0;
 
-		openCloseGrapper.setStallThreshold(4, 150); //4, 100
+		openCloseGrapper.setStallThreshold(10, 100); //4, 100
 
 		openCloseGrapper.forward();
 		while (!openCloseGrapper.isStalled() || i <= 1500) {
+			if(i == 500) {
+			    openCloseGrapper.setStallThreshold(7, 100);
+			}
+
 			if(i == 2500) break;
 			i++;
 			Delay.msDelay(1);
@@ -75,12 +79,14 @@ public class PeripheralDevices {
 
 	}
 	
-	public void openGrapperLittle() {
+	
+	
+	public void openGrapperVar(int size, boolean imediateReturn) {
 		
-		openCloseGrapper.setAcceleration(500);
+		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setSpeed(720);
 		
-		openCloseGrapper.rotate(-300);
+		openCloseGrapper.rotate(size, imediateReturn);
 		
 		resetOpenCloseAcc();
 		resetOpenCloseSpeed();
@@ -89,11 +95,11 @@ public class PeripheralDevices {
 
 	public void openGrapper() {
 
-		
-		openCloseGrapper.setAcceleration(1000);
+		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setSpeed(720);
-		openCloseGrapper.setStallThreshold(7, 250);
-		openCloseGrapper.rotate(-1500);
+		openCloseGrapper.setStallThreshold(5, 250); //5, 250
+
+		openCloseGrapper.rotate(-900, true);
 		
 		resetOpenCloseAcc();
 		resetOpenCloseSpeed();
@@ -103,13 +109,15 @@ public class PeripheralDevices {
 	public void upGrapper() {
 
 		// Change speed to match rotation duration
-		openCloseGrapper.setSpeed(90);
+		openCloseGrapper.setSpeed(175); //før 90
 		upDownGrapper.setSpeed(360);
 		
-		openCloseGrapper.flt();
-		Delay.msDelay(10);
+		//openCloseGrapper.flt();
+		//Delay.msDelay(10);
+
+		openCloseGrapper.setStallThreshold(10, 250);
 		
-		openCloseGrapper.rotate(-165, true);
+		openCloseGrapper.rotate(-180, true);
 		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		
@@ -182,6 +190,24 @@ public class PeripheralDevices {
 	public void cornerCalibrate() {
 
 		openCloseGrapper.rotate(325);
+		
+	}
+	
+	public void resetTachoOpenClose() {
+		
+		openCloseGrapper.resetTachoCount();
+		
+	}
+	
+	public void openGrapperVarTo (int size, boolean imediateReturn) {
+		
+		openCloseGrapper.setAcceleration(2000);
+		openCloseGrapper.setSpeed(720);
+		
+		openCloseGrapper.rotateTo(size, imediateReturn);
+		
+		resetOpenCloseAcc();
+		resetOpenCloseSpeed();
 		
 	}
 

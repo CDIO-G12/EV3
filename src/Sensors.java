@@ -32,20 +32,6 @@ public class Sensors {
 		return sample[0];
 		
 	}
-	
-	public boolean checkBall() {
-		
-		if(!readColors()) {
-			Delay.msDelay(1500);
-			
-			if(!readColors()) {
-				Sound.buzz();
-				return false;
-			}
-		}
-		
-		return true;
-	}
 		
 	/*
 	 * Reads the different RGB values and returns true if a ball roles past.
@@ -66,5 +52,6 @@ public class Sensors {
 		//Returns if all rgb values are over 0,5, which means it should be a white ball
 		return (sample[0] >= cutoffValue && sample[1] >= cutoffValue && sample[2] >= cutoffValue);
 			
-	}	
+	}
+	
 }

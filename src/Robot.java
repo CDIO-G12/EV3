@@ -62,6 +62,19 @@ public class Robot {
 
 	public void run() throws UnknownHostException, IOException {
 
+
+		Thread tPickup = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+			
+			
+			
+				
+			}
+		});
+
+
 		/*
 		 * Checks if command(s) is present If it is we call the appropriate function
 		 */
@@ -117,7 +130,7 @@ public class Robot {
 						break;
 
 					case "B":
-						moveCon.moveBackward(arg);
+						moveCon.moveBackward(arg, false);
 						break;
 
 					case "L":
@@ -181,19 +194,28 @@ public class Robot {
 						moveCon.stop();
 						while(moveCon.isMoving());
 						moveCon.resetSpeed();
+						//moveCon.moveBackward((byte) 75, true);
 						pd.upGrapper();
 
 						// Check for ball twice
-						String tempSave;
-						
-						if(sen.checkBall()) {
-							
-							tempSave = "gb";
-						} else {
-							tempSave = "nb";
-						}
+						String tempSave = "nb";
+						int openAmount = -900;
 
-						pd.openGrapper();
+						pd.resetTachoOpenClose();
+						
+						for(int i = 0; i < 3; i++) {
+	
+							if(sen.readColors()) {
+								tempSave = "gb";
+								Sound.beep();
+								break;	
+							}
+							
+							pd.openGrapperVar(-50, false);
+							
+						}
+						
+						pd.openGrapperVarTo(openAmount, true);
 
 						outputQueue.add(tempSave);
 						
@@ -296,19 +318,19 @@ public class Robot {
 	
 	public void pickUpSequence() {
 		
-		for(int i = 0; i < 2; i++) {
+		while(true) {
 			
-			LCD.drawString("1", 0, 0);
+			//LCD.drawString("1", 0, 0);
 			pd.downGrapper();
 
-			LCD.drawString("2", 0, 0);
-			moveCon.setSpeed(80);
+			//LCD.drawString("2", 0, 0);
+			moveCon.setSpeed(100);
 			
 
-			LCD.drawString("3", 0, 0);
+			//LCD.drawString("3", 0, 0);
 			moveCon.moveForwardFine((byte) 250);
 			
-			LCD.drawString("4", 0, 0);
+			//LCD.drawString("4", 0, 0);
 			pd.closeGrapper();
 			
 			moveCon.stop();
@@ -317,15 +339,62 @@ public class Robot {
 			
 			pd.upGrapper();
 			
-			if(!sen.checkBall()) {
-				Sound.buzz();
-			} 
+			if(!sen.readColors()) {
+				pd.openGrapperVar(-180, true);
+				Delay.msDelay(1000);
+				
+				if(!sen.readColors()) {
+					Sound.buzz();
+				}
+			}
 			
 			pd.openGrapper();
+			
+			pd.poop((byte) 1);
 		}
 		
-		pd.poop((byte) 1);
-		
+	}
+
+	public void testTurning() {
+
+	    while(true) {
+
+			        moveCon.turnLeft((byte) 90);
+
+        			//LCD.drawString("1", 0, 0);
+        			pd.downGrapper();
+
+        			//LCD.drawString("2", 0, 0);
+        			moveCon.setSpeed(100);
+
+
+        			//LCD.drawString("3", 0, 0);
+        			moveCon.moveForwardFine((byte) 250);
+
+        			//LCD.drawString("4", 0, 0);
+        			pd.closeGrapper();
+
+        			moveCon.stop();
+
+        			moveCon.resetSpeed();
+
+        			pd.upGrapper();
+
+        			if(!sen.readColors()) {
+        				pd.openGrapperVar(-180, true);
+        				Delay.msDelay(1000);
+
+        				if(!sen.readColors()) {
+        					Sound.buzz();
+        				}
+        			}
+
+        			pd.openGrapper();
+
+        			pd.poop((byte) 1);
+        		}
+
+
 	}
 	
 	
@@ -349,9 +418,11 @@ public class Robot {
 		moveCon.resetSpeed();
 		pd.upGrapper();
 		
+		/*
 		if(!sen.checkBall()) {
 			Sound.buzz();
 		}
+		*/
 		
 		pd.openGrapper();
 		
