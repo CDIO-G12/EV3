@@ -1,6 +1,10 @@
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3GyroSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.RegulatedMotor;
+import lejos.utility.Delay;
 
 public class MovementController {
 
@@ -8,6 +12,7 @@ public class MovementController {
 	private float wheelDistance;
 	private RegulatedMotor left;
 	private RegulatedMotor right;
+	private EV3GyroSensor gyroSensor;
 	
 	private float wheelRadius;
 	private float wheelDistanceRadius;
@@ -18,22 +23,38 @@ public class MovementController {
 	private float distancePrDegree;
 	
 	private int standardAcc = 500;
-	private int defaultSpeed = 720;
+	private int defaultSpeed = 360;
+	
+	private boolean useGyro = false;
 	
 	
-	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
+	public MovementController(Port left, Port right, Port gyroSensor, float wheelSize, float wheelDistance) {
 		
 		this.wheelSize = wheelSize;
 		this.wheelDistance = wheelDistance;
 		
 		this.left = new EV3LargeRegulatedMotor(left);
 		this.right = new EV3LargeRegulatedMotor(right);
+		this.gyroSensor = new EV3GyroSensor(gyroSensor);
+		
 		this.left.setAcceleration(standardAcc);
 		this.right.setAcceleration(standardAcc);
+		this.right.setSpeed(defaultSpeed);
+		this.left.setSpeed(defaultSpeed);
 		
 		this.left.synchronizeWith(new RegulatedMotor[] {this.right});
 		
 		setupVariables();
+		
+	}
+	
+	public void test() {
+		
+		left.startSynchronization();
+		left.rotate(100);
+		right.rotate(100);
+		left.endSynchronization();
+		
 		
 	}
 	
@@ -59,6 +80,7 @@ public class MovementController {
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
 	public void moveForwardFine(byte distance) {
+		useGyro = false;
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -73,17 +95,19 @@ public class MovementController {
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
 	public void moveForward(byte distance) {
+		resetGyro();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn*255);
-		right.rotate(degreesToTurn*255);
+		left.rotate(degreesToTurn*20);
+		right.rotate(degreesToTurn*20);
 		left.endSynchronization();
 		
 	}
 	
 	public void moveBackward(byte distance) {
+		resetGyro();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -98,6 +122,7 @@ public class MovementController {
 	 * Takes input in degrees and turns to the desired side
 	 */
 	public void turnRight(byte degrees) {
+		useGyro = false;
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 
@@ -110,6 +135,7 @@ public class MovementController {
 	}
 	
 	public void turnLeft(byte degrees) {
+		useGyro = false;
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 		
@@ -151,7 +177,16 @@ public class MovementController {
 	public void resetSpeed() {
 		left.setSpeed(defaultSpeed);
 		right.setSpeed(defaultSpeed);
-		
+	}
+	
+	public void setAcc(int acc) {
+		left.setAcceleration(acc);
+		right.setAcceleration(acc);
+	}
+	
+	public void resetAcc() {
+		left.setAcceleration(defaultSpeed);
+		right.setAcceleration(defaultSpeed);
 	}
 	
 	/*
@@ -172,6 +207,61 @@ public class MovementController {
 		
 	}
 	
+	public void adjustAngle() {
+		
+		if(!useGyro) return;
+		
+		// Read gyro and apply differnce to wheel speed
+		
+		float sample = readGyro();
+		float newSpeed = 0;
+		
+		if(sample == 0) {
+			
+			resetSpeed();
+			
+			return;
+		}
+		
+		if(sample < 0) {
+			
+			newSpeed = defaultSpeed + (sample * 5);
+			
+			left.setSpeed((int) newSpeed);
+			// Left side to turn slower
+			
+		} else {
+			
+			newSpeed = defaultSpeed - (sample * 5);
+			
+			left.setSpeed(defaultSpeed);
+			// Right side to turn slower
+			
+		}
+	
+		LCD.drawString("newSpeed: " + newSpeed, 0, 3);
+		LCD.drawString("Angle: " + sample, 0, 4);
+		
+	}
+	
+	public void resetGyro() {
+		
+		gyroSensor.reset();
+		useGyro = true;
+		resetSpeed();
+		
+	}
+	
+	public float readGyro() {
+		
+		float[] sample = new float[1];
+		
+		gyroSensor.getAngleMode().fetchSample(sample, 0);
+		
+		return sample[0];
+		
+	}
+	
 	/*
 	 * Close motors
 	 */
@@ -179,11 +269,5 @@ public class MovementController {
 		this.left.close();
 		this.right.close();
 	}
-	
-	
-	
-	
-	
-	
 	
 }
