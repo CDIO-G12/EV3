@@ -231,25 +231,6 @@ public class Robot {
 						outputQueue.add("pb");
 						startPickup = true;
 						
-						while(pickupRunning);
-						
-						if(arg == 1) {
-							pd.cornerCalibrate();
-						}
-							
-						pd.downGrapper();
-						moveCon.setSpeed(150);
-						moveCon.moveForwardFine((byte) 175);
-						pd.closeGrapper();
-						moveCon.stop();
-						while(moveCon.isMoving());
-						moveCon.resetSpeed();
-						//moveCon.moveBackward((byte) 75, true);
-
-
-						outputQueue.add("pb");
-						startPickup = true;
-						
 						break;
 						
 					}
