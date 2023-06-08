@@ -2,7 +2,6 @@ import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3GyroSensor;
-import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
@@ -100,8 +99,8 @@ public class MovementController {
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn*20);
-		right.rotate(degreesToTurn*20);
+		left.rotate(degreesToTurn*10);
+		right.rotate(degreesToTurn*10);
 		left.endSynchronization();
 		
 	}
@@ -142,6 +141,40 @@ public class MovementController {
 		left.rotate(-totalDegrees);
 		right.rotate(totalDegrees);
 		left.endSynchronization();
+		
+	}
+	
+	public void turnRightGyro(int degrees) {
+		
+		resetGyro();
+		setSpeed(100);
+
+		left.startSynchronization();
+		left.forward();
+		right.backward();
+		left.endSynchronization();
+		
+		while(Math.abs(getGyroAngle()) <= ((float) degrees * 0.95));
+		
+		stop();
+		
+		
+	}
+	
+	public void turnLeftGyro(int degrees) {
+
+		resetGyro();
+		setSpeed(100);
+
+		left.startSynchronization();
+		left.backward();
+		right.forward();
+		left.endSynchronization();
+		
+		while(Math.abs(getGyroAngle()) <= ((float) degrees * 0.95));
+		
+		stop();
+		
 		
 	}
 	
@@ -256,8 +289,6 @@ public class MovementController {
 		float[] sample = new float[1];
 
 		gyroSensor.getAngleMode().fetchSample(sample, 0);
-
-		LCD.drawString("gyroAngle: " + sample[0], 0, 4);
 
 		return sample[0];
 		

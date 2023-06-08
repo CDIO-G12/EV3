@@ -27,7 +27,6 @@ public class Robot {
 	// Unused sensor
 	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
-	//private static final Port upDownSensor = SensorPort.S2;
 	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
@@ -39,8 +38,8 @@ public class Robot {
 	/*
 	 * Physical sizes on the robot in millimeters
 	 */
-	private static final float wheelDiameter = 43.2f;
-	private static final float robotDiagonal = 100f;
+	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website
+	private static final float robotDiagonal = 112.5f;	// Distance between the wheels
 
 	/*
 	 * Public objects
@@ -213,26 +212,69 @@ public class Robot {
 						break;
 					case "T":
 						while(pickupRunning);
-						
-						if(arg == 1) {
-							pd.cornerCalibrate();
-						}
+
+						if(arg == 0) {
 							
-						pd.downGrapper();
-						moveCon.setSpeed(150);
-						moveCon.moveForwardFine((byte) 175);
-						pd.closeGrapper();
-						moveCon.stop();
-						while(moveCon.isMoving());
-						moveCon.resetSpeed();
-						//moveCon.moveBackward((byte) 75, true);
+							pickUp((byte) 80, true);
+							break;
+							
+						} else if(arg == 1) {
+							
+							pickUp((byte) 0, true);
+							break;
+							
+						} else if(arg == 2) {
 
-
-						outputQueue.add("pb");
-						startPickup = true;
-						
-						break;
-						
+							float distanceMM = sen.readDistanceAve() * 1000;
+							
+							if(distanceMM < 200) {
+								
+								moveCon.setSpeed(20);
+								moveCon.moveBackward((byte) (180 - distanceMM), false);
+								
+							}
+							
+							pickUp((byte) 0, false);
+							
+							moveCon.moveBackward((byte) 20, false);
+							
+							pd.upGrapper();
+							
+							// Check for ball twice
+							String tempSave = "nb";
+							int openAmount = -900;
+			
+							pd.resetTachoOpenClose();
+							
+							for(int i = 0; i < 3; i++) {
+			
+								if(sen.readColors()) {
+									tempSave = "gb";
+									Sound.beep();
+									break;	
+								}
+								
+								pd.openGrapperVar(-50, false);
+								
+							}
+							
+							pd.openGrapperVarTo(openAmount, true);
+			
+							outputQueue.add(tempSave);
+							
+							break;
+							
+						} else if(arg == 3) {
+							
+							
+							break;
+							
+						} else {
+							
+							pd.upGrapper();
+							break;
+							
+						}	
 					}
 					
 					newCommand = false;
@@ -330,83 +372,138 @@ public class Robot {
 		}
 	}
 	
+	private void pickUp(byte distance, boolean runPickupThread) {
+		
+		pd.downGrapper();
+		moveCon.setSpeed(150);
+		moveCon.moveForwardFine(distance);
+		pd.closeGrapper();
+		moveCon.stop();
+		while(moveCon.isMoving());
+		
+		if(runPickupThread) {
+			outputQueue.add("pb");
+			startPickup = true;
+		}
+	}
+	
+	
 	public void pickUpSequence() {
 		
-		while(true) {
+		
+		float distanceMM = sen.readDistanceAve() * 1000;
+		
+		LCD.drawString("Distance bef: " + distanceMM, 0, 2);
+		
+		if(distanceMM < 200) {
 			
-			//LCD.drawString("1", 0, 0);
-			pd.downGrapper();
+			moveCon.setSpeed(20);
+			moveCon.moveBackward((byte) (180 - distanceMM), false);
+			
+		}
+		
+		Delay.msDelay(5000);
+		
+		LCD.drawString("Distance aft" + (sen.readDistanceAve() * 1000), 0, 3);
+		
+		pickUp((byte) 0, false);
+		
+		moveCon.moveBackward((byte) 20, false);
+		
+		pd.upGrapper();
+		
+		// Check for ball twice
+		int openAmount = -900;
 
-			//LCD.drawString("2", 0, 0);
-			moveCon.setSpeed(100);
-			
+		pd.resetTachoOpenClose();
+		
+		for(int i = 0; i < 3; i++) {
 
-			//LCD.drawString("3", 0, 0);
-			moveCon.moveForwardFine((byte) 250);
-			
-			//LCD.drawString("4", 0, 0);
-			pd.closeGrapper();
-			
-			moveCon.stop();
-			
-			moveCon.resetSpeed();
-			
-			pd.upGrapper();
-			
-			if(!sen.readColors()) {
-				pd.openGrapperVar(-180, true);
-				Delay.msDelay(1000);
-				
-				if(!sen.readColors()) {
-					Sound.buzz();
-				}
+			if(sen.readColors()) {
+				Sound.beep();
+				break;	
 			}
 			
-			pd.openGrapper();
+			pd.openGrapperVar(-50, false);
 			
-			pd.poop((byte) 1);
 		}
+		
+		pd.openGrapperVarTo(openAmount, true);
+		
+		pd.openGrapper();
+		
+		Delay.msDelay(2000);
+	}
+	
+	public void test() {
+		
+		float distanceMM = sen.readDistanceAve() * 1000;
+		
+		if(distanceMM < 200) {
+			
+			moveCon.setSpeed(20);
+			moveCon.moveBackward((byte) (180 - distanceMM), false);
+			
+		}
+		
+		pickUp((byte) 0, false);
+		
+		moveCon.moveBackward((byte) 20, false);
+		
+		pd.upGrapper();
+		
+		// Check for ball twice
+		String tempSave = "nb";
+		int openAmount = -900;
+
+		pd.resetTachoOpenClose();
+		
+		for(int i = 0; i < 3; i++) {
+
+			if(sen.readColors()) {
+				tempSave = "gb";
+				Sound.beep();
+				break;	
+			}
+			
+			pd.openGrapperVar(-50, false);
+			
+		}
+		
+		pd.openGrapperVarTo(openAmount, true);
+
+		outputQueue.add(tempSave);
+		
+		Delay.msDelay(2000);
+		
+	}
+	
+	public void runTest() {
+
+		moveCon.moveForward((byte) 40);
+		
+		while(moveCon.isMoving());
+		
 		
 	}
 
-	public void testTurning() {
+	public void testTurning() {	
 
-	    while(true) {
-
-			        moveCon.turnLeft((byte) 90);
-
-        			//LCD.drawString("1", 0, 0);
-        			pd.downGrapper();
-
-        			//LCD.drawString("2", 0, 0);
-        			moveCon.setSpeed(100);
-
-
-        			//LCD.drawString("3", 0, 0);
-        			moveCon.moveForwardFine((byte) 250);
-
-        			//LCD.drawString("4", 0, 0);
-        			pd.closeGrapper();
-
-        			moveCon.stop();
-
-        			moveCon.resetSpeed();
-
-        			pd.upGrapper();
-
-        			if(!sen.readColors()) {
-        				pd.openGrapperVar(-180, true);
-        				Delay.msDelay(1000);
-
-        				if(!sen.readColors()) {
-        					Sound.buzz();
-        				}
-        			}
-
-        			pd.openGrapper();
-
-        			pd.poop((byte) 1);
-        		}
+		for(int i = 0; i < 8; i++) {
+			
+			if(i > 3) {
+				
+				moveCon.turnLeftGyro(45);
+				
+			} else {
+				
+				moveCon.turnRightGyro(45);
+				
+			}
+			
+			Delay.msDelay(1000);
+			
+		}
 
 
 	}
