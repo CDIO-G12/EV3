@@ -25,10 +25,10 @@ public class Robot {
 	private static final Port openCloseGrapper = MotorPort.D;
 	private static final Port upDownGrapper = MotorPort.A;
 	// Unused sensor
-	// private static final Port distanceSesnor = SensorPort.S1;
+	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
-	private static final Port upDownSensor = SensorPort.S4;
-	//private static final Port gyro = SensorPort.S1;
+	//private static final Port upDownSensor = SensorPort.S2;
+	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
 	 * TCP communication variables
@@ -46,21 +46,64 @@ public class Robot {
 	 * Public objects
 	 */
 	// private NetworkCommunication netComm = new NetworkCommunication(ip, port);
-	private final MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter,
+	private final MovementController moveCon = new MovementController(leftPort, rightPort, gyroSensor, wheelDiameter,
 			robotDiagonal);
-	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper, upDownSensor);
-	private final Sensors sen = new Sensors(colorSensor);
+	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper);
+	private final Sensors sen = new Sensors(colorSensor, distanceSesnor);
 
 	/*
 	 * Variables used for receiving and queuing movement commands
 	 */
 	private boolean newCommand = false;
 	private boolean stop = false;
+	private boolean pickupRunning = false;
+	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
 	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T' };
 
 	public void run() throws UnknownHostException, IOException {
+
+
+		final Thread tPickup = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(true) {
+					while(!startPickup);
+					startPickup = false;
+					
+					pickupRunning = true;
+				
+					pd.upGrapper();
+	
+					// Check for ball twice
+					String tempSave = "nb";
+					int openAmount = -900;
+	
+					pd.resetTachoOpenClose();
+					
+					for(int i = 0; i < 3; i++) {
+	
+						if(sen.readColors()) {
+							tempSave = "gb";
+							Sound.beep();
+							break;	
+						}
+						
+						pd.openGrapperVar(-50, false);
+						
+					}
+					
+					pd.openGrapperVarTo(openAmount, true);
+	
+					outputQueue.add(tempSave);
+					pickupRunning = false;
+				
+				}
+			}
+		});
+
 
 		/*
 		 * Checks if command(s) is present If it is we call the appropriate function
@@ -88,6 +131,10 @@ public class Robot {
 						}
 					}
 					
+					if(isMoving) {
+						moveCon.adjustAngle();
+					}
+					
 					if (!newCommand) {
 						continue;
 					}
@@ -104,6 +151,7 @@ public class Robot {
 					switch (commands[0]) {
 
 					case "F":
+						
 						moveCon.moveForward(arg);
 						break;
 
@@ -112,7 +160,7 @@ public class Robot {
 						break;
 
 					case "B":
-						moveCon.moveBackward(arg);
+						moveCon.moveBackward(arg, false);
 						break;
 
 					case "L":
@@ -187,6 +235,25 @@ public class Robot {
 						
 						pd.openGrapper();
 						
+						while(pickupRunning);
+						
+						if(arg == 1) {
+							pd.cornerCalibrate();
+						}
+							
+						pd.downGrapper();
+						moveCon.setSpeed(150);
+						moveCon.moveForwardFine((byte) 175);
+						pd.closeGrapper();
+						moveCon.stop();
+						while(moveCon.isMoving());
+						moveCon.resetSpeed();
+						//moveCon.moveBackward((byte) 75, true);
+
+
+						outputQueue.add("pb");
+						startPickup = true;
+						
 						break;
 						
 					}
@@ -199,6 +266,7 @@ public class Robot {
 
 		// tnetwork.start();
 		tHandler.start();
+		tPickup.start();
 
 		/*
 		 * Create thread that read commands from TCP connection and stores it in the
@@ -285,27 +353,126 @@ public class Robot {
 		}
 	}
 	
+	public void pickUpSequence() {
+		
+		while(true) {
+			
+			//LCD.drawString("1", 0, 0);
+			pd.downGrapper();
+
+			//LCD.drawString("2", 0, 0);
+			moveCon.setSpeed(100);
+			
+
+			//LCD.drawString("3", 0, 0);
+			moveCon.moveForwardFine((byte) 250);
+			
+			//LCD.drawString("4", 0, 0);
+			pd.closeGrapper();
+			
+			moveCon.stop();
+			
+			moveCon.resetSpeed();
+			
+			pd.upGrapper();
+			
+			if(!sen.readColors()) {
+				pd.openGrapperVar(-180, true);
+				Delay.msDelay(1000);
+				
+				if(!sen.readColors()) {
+					Sound.buzz();
+				}
+			}
+			
+			pd.openGrapper();
+			
+			pd.poop((byte) 1);
+		}
+		
+	}
+
+	public void testTurning() {
+
+	    while(true) {
+
+			        moveCon.turnLeft((byte) 90);
+
+        			//LCD.drawString("1", 0, 0);
+        			pd.downGrapper();
+
+        			//LCD.drawString("2", 0, 0);
+        			moveCon.setSpeed(100);
+
+
+        			//LCD.drawString("3", 0, 0);
+        			moveCon.moveForwardFine((byte) 250);
+
+        			//LCD.drawString("4", 0, 0);
+        			pd.closeGrapper();
+
+        			moveCon.stop();
+
+        			moveCon.resetSpeed();
+
+        			pd.upGrapper();
+
+        			if(!sen.readColors()) {
+        				pd.openGrapperVar(-180, true);
+        				Delay.msDelay(1000);
+
+        				if(!sen.readColors()) {
+        					Sound.buzz();
+        				}
+        			}
+
+        			pd.openGrapper();
+
+        			pd.poop((byte) 1);
+        		}
+
+
+	}
+	
 	
 	public void testCorner() {
 		
-		//pd.poop((byte) 2);
+		//pd.openGrapper();
+		moveCon.setSpeed(40);
+		moveCon.moveForwardFine((byte) 250);
 		
+		while(sen.readDistance() > 0.25);
+		
+		moveCon.stop();
+
+		pd.cornerCalibrate();
 		pd.downGrapper();
+		
+		Delay.msDelay(1000);
 		
 		pd.closeGrapper();
 		
+		moveCon.resetSpeed();
 		pd.upGrapper();
+		
+		/*
+		if(!sen.checkBall()) {
+			Sound.buzz();
+		}
+		*/
 		
 		pd.openGrapper();
 		
-		Delay.msDelay(2000);
 		
-		
+		/*
 		pd.cornerCalibrate();
 		pd.downGrapper();
 		moveCon.setSpeed(80);
 		moveCon.moveForwardFine((byte) 200);
 		pd.closeGrapper();
+		
+		
+		while(sen.readDistance() > 0.19);
 		moveCon.stop();
 		
 		moveCon.moveBackward((byte) 100);
@@ -320,8 +487,28 @@ public class Robot {
 		}
 		
 		pd.openGrapper();
+		*/
+	}
+	
+	public void gyroTest() {
 		
+		moveCon.moveForward((byte) 100);
 		
+		while(moveCon.isMoving()) {
+			
+			moveCon.adjustAngle();
+			
+		}
+	}
+	
+	public void distanceTest() {
+		
+		while(true) {
+			
+			LCD.drawString("Distance: " + sen.readDistance(), 0, 3);
+			Delay.msDelay(200);
+			
+		}
 		
 	}
 	
