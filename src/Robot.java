@@ -212,6 +212,28 @@ public class Robot {
 						}
 						break;
 					case "T":
+						if(arg == 1) {
+							pd.cornerCalibrate();
+						}
+							
+						pd.downGrapper();
+						moveCon.setSpeed(80);
+						moveCon.moveForwardFine((byte) 170);
+						pd.closeGrapper();
+						moveCon.stop();
+						while(moveCon.isMoving());
+						moveCon.resetSpeed();
+						pd.upGrapper();
+
+						// Check for ball twice
+						if(!sen.checkBall()) {
+							outputQueue.add("nb");
+						} else {
+							pd.openGrapper();
+							outputQueue.add("gb");
+						}
+						
+						pd.openGrapper();
 						
 						while(pickupRunning);
 						
@@ -233,6 +255,7 @@ public class Robot {
 						startPickup = true;
 						
 						break;
+						
 					}
 					
 					newCommand = false;
