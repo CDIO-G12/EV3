@@ -3,6 +3,7 @@ import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.utility.Delay;
 
 
@@ -12,27 +13,24 @@ public class Sensors {
 	 * Private copies of parsed arguments
 	 */
 	private EV3ColorSensor colorSensor;
-	private EV3GyroSensor gyroSensor;
+	private EV3UltrasonicSensor distanceSensor;
 	private double cutoffValue = 0.015;
 	
-	public Sensors(Port colorSensor) {
+	public Sensors(Port colorSensor, Port distanceSensor) {
 	
 		this.colorSensor = new EV3ColorSensor(colorSensor);
+		this.distanceSensor = new EV3UltrasonicSensor(distanceSensor);
 		
 	}
 	
-	public boolean checkBall() {
+	public float readDistance() {
 		
-		if(!readColors()) {
-			Delay.msDelay(1000);
-		}
+		float[] sample = new float[1];
 		
-		if(!readColors()) {
-			Sound.buzz();
-			return false;
-		}
+		distanceSensor.getDistanceMode().fetchSample(sample, 0);
 		
-		return true;
+		return sample[0];
+		
 	}
 		
 	/*
@@ -55,5 +53,5 @@ public class Sensors {
 		return (sample[0] >= cutoffValue && sample[1] >= cutoffValue && sample[2] >= cutoffValue);
 			
 	}
-		
+	
 }
