@@ -64,7 +64,7 @@ public class PeripheralDevices {
 		openCloseGrapper.setStallThreshold(10, 100); //4, 100
 
 		openCloseGrapper.forward();
-		while (!openCloseGrapper.isStalled() || i <= 1500) {
+		while (!openCloseGrapper.isStalled() || i <= 1500) { // i <= 1500
 			if(i == 500) {
 			    openCloseGrapper.setStallThreshold(7, 100);
 			}
@@ -126,10 +126,22 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 			
 	}
+	
+	public void upGrapperOnly() {
+
+		openCloseGrapper.setSpeed(175); //før 90
+		upDownGrapper.setSpeed(360);
+
+		upDownGrapper.rotate(550);		
+		while (upDownGrapper.isMoving());
+		resetOpenCloseSpeed();
+		resetUpDownSpeed();
+		
+	}
 
 	public void downGrapper() {
 		upDownGrapper.setSpeed(150);
-		upDownGrapper.setStallThreshold(70, 100);
+		upDownGrapper.setStallThreshold(80, 100);
 		
 		upDownGrapper.backward();
 		while (!upDownGrapper.isStalled());
@@ -189,13 +201,21 @@ public class PeripheralDevices {
 
 	public void cornerCalibrate() {
 
-		openCloseGrapper.rotate(325);
+		openCloseGrapper.setStallThreshold(10, 200);
+		openCloseGrapper.rotate(-325);
+		
 		
 	}
 	
 	public void resetTachoOpenClose() {
 		
 		openCloseGrapper.resetTachoCount();
+		
+	}
+	
+	public boolean openCloseGrapperIsMoving() {
+		
+		return openCloseGrapper.isMoving();
 		
 	}
 	

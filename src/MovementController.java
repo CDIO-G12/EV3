@@ -3,7 +3,6 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.RegulatedMotor;
-import lejos.utility.Delay;
 
 public class MovementController {
 

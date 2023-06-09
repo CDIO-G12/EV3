@@ -83,7 +83,7 @@ public class Robot {
 					pd.resetTachoOpenClose();
 					
 					for(int i = 0; i < 3; i++) {
-	
+							
 						if(sen.readColors()) {
 							tempSave = "gb";
 							Sound.beep();
@@ -91,6 +91,7 @@ public class Robot {
 						}
 						
 						pd.openGrapperVar(-50, false);
+						Delay.msDelay(100);
 						
 					}
 					
@@ -117,7 +118,6 @@ public class Robot {
 				byte arg = 0;
 
 				boolean isMoving = moveCon.isMoving();
-				boolean orange = true;
 
 				while (!stop) {
 					if (isMoving != moveCon.isMoving()) {
@@ -259,8 +259,9 @@ public class Robot {
 							}
 							
 							pd.openGrapperVarTo(openAmount, true);
-			
+
 							outputQueue.add(tempSave);
+							outputQueue.add("pb");
 							
 							break;
 							
@@ -380,6 +381,7 @@ public class Robot {
 		pd.closeGrapper();
 		moveCon.stop();
 		while(moveCon.isMoving());
+		moveCon.resetSpeed();
 		
 		if(runPickupThread) {
 			outputQueue.add("pb");
@@ -390,49 +392,76 @@ public class Robot {
 	
 	public void pickUpSequence() {
 		
+		pd.closeGrapper();
 		
-		float distanceMM = sen.readDistanceAve() * 1000;
+		pd.cornerCalibrate();
 		
-		LCD.drawString("Distance bef: " + distanceMM, 0, 2);
+		pd.downGrapper();
 		
-		if(distanceMM < 200) {
-			
-			moveCon.setSpeed(20);
-			moveCon.moveBackward((byte) (180 - distanceMM), false);
-			
-		}
-		
-		Delay.msDelay(5000);
-		
-		LCD.drawString("Distance aft" + (sen.readDistanceAve() * 1000), 0, 3);
-		
-		pickUp((byte) 0, false);
+		pd.closeGrapper();
 		
 		moveCon.moveBackward((byte) 20, false);
 		
 		pd.upGrapper();
 		
-		// Check for ball twice
 		int openAmount = -900;
-
+		
 		pd.resetTachoOpenClose();
 		
 		for(int i = 0; i < 3; i++) {
-
+				
 			if(sen.readColors()) {
 				Sound.beep();
 				break;	
 			}
 			
 			pd.openGrapperVar(-50, false);
+			Delay.msDelay(100);
 			
 		}
 		
 		pd.openGrapperVarTo(openAmount, true);
 		
-		pd.openGrapper();
+		Delay.msDelay(1000);
 		
-		Delay.msDelay(2000);
+		/*
+		float distanceMM = sen.readDistanceAve() * 1000;
+		
+		if(distanceMM < 130) {
+			
+			moveCon.setSpeed(20);
+			moveCon.moveBackward((byte) (110 - distanceMM), false);
+			
+		}
+		
+		pd.closeGrapper();
+		while(pd.openCloseGrapperIsMoving());
+		
+		pd.cornerCalibrate();
+		while(pd.openCloseGrapperIsMoving());
+
+		pd.downGrapper();
+		
+		moveCon.moveForwardFine((byte) 10);
+		
+		pd.closeGrapper();
+		
+		moveCon.moveBackward((byte) 20, false);
+		
+		pd.cornerCalibrate();
+		while(pd.openCloseGrapperIsMoving());
+		
+		moveCon.moveForwardFine((byte) 20);
+		
+		pd.closeGrapper();
+		while(pd.openCloseGrapperIsMoving());
+		
+		moveCon.moveBackward((byte) 50, false);
+		
+		pd.upGrapper();
+		*/
+		
+		
 	}
 	
 	public void test() {
