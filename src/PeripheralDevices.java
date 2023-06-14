@@ -92,6 +92,18 @@ public class PeripheralDevices {
 		resetOpenCloseSpeed();
 		
 	}
+	
+	public void downGrapperVar(int size, boolean imediateReturn) {
+		
+		upDownGrapper.setAcceleration(2000);
+		upDownGrapper.setSpeed(720);
+		
+		upDownGrapper.rotate(size, imediateReturn);
+		
+		resetUpDownAcc();
+		resetUpDownSpeed();
+		
+	}
 
 	public void openGrapper() {
 
@@ -138,6 +150,20 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 		
 	}
+	
+	
+	public void upGrapperLittle() {
+
+		// Change speed to match rotation duration
+		upDownGrapper.setSpeed(360);
+		upDownGrapper.rotate(290);		
+		while (upDownGrapper.isMoving());
+		
+		// Reset speed
+		resetOpenCloseSpeed();
+		resetUpDownSpeed();
+			
+	}
 
 	public void downGrapper() {
 		upDownGrapper.setSpeed(150);
@@ -150,6 +176,31 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 
 	}
+	
+	public void downGrapperLittle() {
+		upDownGrapper.setSpeed(150);
+		upDownGrapper.setStallThreshold(80, 100);
+		
+		upDownGrapper.rotate(-290);
+		while(upDownGrapper.isMoving());
+		
+		resetUpDownSpeed();
+
+	}
+	
+	
+	public void grapperPulse() {
+
+		openCloseGrapper.setStallThreshold(80, 100);
+		
+		while(!openCloseGrapper.isStalled()) {
+			
+			openGrapperVar(-150, false);			
+			openGrapperVar(100, false);
+			
+		}
+	}
+		
 
 	private boolean grapperIsDown() {
 

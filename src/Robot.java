@@ -389,82 +389,33 @@ public class Robot {
 		}
 	}
 	
+	public void cornerGrapper() {
+		
+		while(true) {
+		
+		pd.downGrapper();
+		
+		pd.upGrapperOnly();
+		
+		pd.downGrapperLittle();  //Lodret Pis
+		
+		moveCon.moveForwardFine((byte) 15);
+		
+		Delay.msDelay(100);
+		
+		pd.downGrapperVar(-25, false); //Klar til bold
 	
-	public void pickUpSequence() {
+		Delay.msDelay(100);
 		
-		pd.closeGrapper();
+		moveCon.moveBackward((byte) 200, false);
+		while(moveCon.isMoving());
 		
-		pd.cornerCalibrate();
-		
-		pd.downGrapper();
-		
-		pd.closeGrapper();
-		
-		moveCon.moveBackward((byte) 20, false);
-		
-		pd.upGrapper();
-		
-		int openAmount = -900;
-		
-		pd.resetTachoOpenClose();
-		
-		for(int i = 0; i < 3; i++) {
-				
-			if(sen.readColors()) {
-				Sound.beep();
-				break;	
-			}
-			
-			pd.openGrapperVar(-50, false);
-			Delay.msDelay(100);
-			
-		}
-		
-		pd.openGrapperVarTo(openAmount, true);
-		
-		Delay.msDelay(1000);
-		
-		/*
-		float distanceMM = sen.readDistanceAve() * 1000;
-		
-		if(distanceMM < 130) {
-			
-			moveCon.setSpeed(20);
-			moveCon.moveBackward((byte) (110 - distanceMM), false);
-			
-		}
-		
-		pd.closeGrapper();
-		while(pd.openCloseGrapperIsMoving());
-		
-		pd.cornerCalibrate();
-		while(pd.openCloseGrapperIsMoving());
+		pd.upGrapperLittle();
 
-		pd.downGrapper();
-		
-		moveCon.moveForwardFine((byte) 10);
-		
-		pd.closeGrapper();
-		
-		moveCon.moveBackward((byte) 20, false);
-		
-		pd.cornerCalibrate();
-		while(pd.openCloseGrapperIsMoving());
-		
-		moveCon.moveForwardFine((byte) 20);
-		
-		pd.closeGrapper();
-		while(pd.openCloseGrapperIsMoving());
-		
-		moveCon.moveBackward((byte) 50, false);
-		
-		pd.upGrapper();
-		*/
-		
-		
+		}
 	}
 	
-	public void test() {
+	public void testBorders() {
 		
 		float distanceMM = sen.readDistanceAve() * 1000;
 		
@@ -537,62 +488,6 @@ public class Robot {
 
 	}
 	
-	
-	public void testCorner() {
-		
-		//pd.openGrapper();
-		moveCon.setSpeed(40);
-		moveCon.moveForwardFine((byte) 250);
-		
-		while(sen.readDistance() > 0.25);
-		
-		moveCon.stop();
-
-		pd.cornerCalibrate();
-		pd.downGrapper();
-		
-		Delay.msDelay(1000);
-		
-		pd.closeGrapper();
-		
-		moveCon.resetSpeed();
-		pd.upGrapper();
-		
-		/*
-		if(!sen.checkBall()) {
-			Sound.buzz();
-		}
-		*/
-		
-		pd.openGrapper();
-		
-		
-		/*
-		pd.cornerCalibrate();
-		pd.downGrapper();
-		moveCon.setSpeed(80);
-		moveCon.moveForwardFine((byte) 200);
-		pd.closeGrapper();
-		
-		
-		while(sen.readDistance() > 0.19);
-		moveCon.stop();
-		
-		moveCon.moveBackward((byte) 100);
-		
-		while(moveCon.isMoving());
-		moveCon.resetSpeed();
-		pd.upGrapper();
-
-		// Check for ball twice
-		if(!sen.checkBall()) {
-			Sound.buzz();
-		}
-		
-		pd.openGrapper();
-		*/
-	}
-	
 	public void gyroTest() {
 		
 		moveCon.moveForward((byte) 100);
@@ -608,7 +503,7 @@ public class Robot {
 		
 		while(true) {
 			
-			LCD.drawString("Distance: " + sen.readDistance(), 0, 3);
+			LCD.drawString("Distance: " + sen.readDistance() * 100, 0, 3);
 			Delay.msDelay(200);
 			
 		}
