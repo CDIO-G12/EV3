@@ -172,7 +172,6 @@ public class Robot {
 
 					case "S":
 						if (arg == -1) {
-							// Skal testes
 							pd.downGrapper();
 							moveCon.moveForwardFine((byte) 10);
 							while (moveCon.isMoving())
@@ -212,17 +211,20 @@ public class Robot {
 						break;
 					case "T":
 						while(pickupRunning);
-
+						
+						//Case for simple ball
 						if(arg == 0) {
 							
 							pickUp((byte) 80, true);
 							break;
-							
+						
+						//Case for semi-difficult ball	
 						} else if(arg == 1) {
 							
 							pickUp((byte) 0, true);
 							break;
-							
+						
+						//Case for borderball
 						} else if(arg == 2) {
 
 							float distanceMM = sen.readDistanceAve() * 1000;
@@ -237,6 +239,7 @@ public class Robot {
 							pickUp((byte) 0, false);
 							
 							moveCon.moveBackward((byte) 20, false);
+							while(moveCon.isMoving());
 							
 							pd.upGrapper();
 							
@@ -265,11 +268,13 @@ public class Robot {
 							
 							break;
 							
+						//Case for cornerBall	
 						} else if(arg == 3) {
 							
+							cornerGrapper();
 							
 							break;
-							
+				
 						} else {
 							
 							pd.upGrapper();
@@ -277,9 +282,7 @@ public class Robot {
 							
 						}	
 					}
-					
 					newCommand = false;
-
 				}
 			}
 		});
@@ -391,19 +394,19 @@ public class Robot {
 	
 	public void cornerGrapper() {
 		
-		while(true) {
-		
 		pd.downGrapper();
 		
 		pd.upGrapperOnly();
 		
-		pd.downGrapperLittle();  //Lodret Pis
+		//Klo 2 bliver sat lodret
+		pd.downGrapperLittle();  
 		
 		moveCon.moveForwardFine((byte) 15);
 		
 		Delay.msDelay(100);
 		
-		pd.downGrapperVar(-25, false); //Klar til bold
+		//Klo 2 sat i position til at scoope bold ud
+		pd.downGrapperVar(-25, false); 
 	
 		Delay.msDelay(100);
 		
@@ -412,7 +415,24 @@ public class Robot {
 		
 		pd.upGrapperLittle();
 
-		}
+	}
+	
+	
+	//testScript, en del af tjeklisten
+	public void testScript() {
+		
+		pd.downGrapper();
+		moveCon.setSpeed(150);
+		moveCon.moveForwardFine((byte) 100);
+		pd.closeGrapper();
+		moveCon.stop();
+		pd.upGrapper();
+		pd.openGrapper();
+		moveCon.resetSpeed();
+		Delay.msDelay(1000);
+		
+		pd.poop((byte) 1);
+		
 	}
 	
 	public void testBorders() {
@@ -465,27 +485,6 @@ public class Robot {
 		while(moveCon.isMoving());
 		
 		
-	}
-
-	public void testTurning() {	
-
-		for(int i = 0; i < 8; i++) {
-			
-			if(i > 3) {
-				
-				moveCon.turnLeftGyro(45);
-				
-			} else {
-				
-				moveCon.turnRightGyro(45);
-				
-			}
-			
-			Delay.msDelay(1000);
-			
-		}
-
-
 	}
 	
 	public void gyroTest() {

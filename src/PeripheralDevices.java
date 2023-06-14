@@ -31,7 +31,7 @@ public class PeripheralDevices {
 		this.upDownGrapper.setSpeed(upDownDefaultSpeed);
 
 	}
-
+	
 	public void calibrateMotors() {
 
 		upDownGrapper.backward();
@@ -61,10 +61,10 @@ public class PeripheralDevices {
 		
 		int i = 0;
 
-		openCloseGrapper.setStallThreshold(10, 100); //4, 100
+		openCloseGrapper.setStallThreshold(10, 100); 
 
 		openCloseGrapper.forward();
-		while (!openCloseGrapper.isStalled() || i <= 1500) { // i <= 1500
+		while (!openCloseGrapper.isStalled() || i <= 1500) {
 			if(i == 500) {
 			    openCloseGrapper.setStallThreshold(7, 100);
 			}
@@ -78,8 +78,6 @@ public class PeripheralDevices {
 		Sound.beepSequenceUp();
 
 	}
-	
-	
 	
 	public void openGrapperVar(int size, boolean imediateReturn) {
 		
@@ -109,7 +107,7 @@ public class PeripheralDevices {
 
 		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setSpeed(720);
-		openCloseGrapper.setStallThreshold(5, 250); //5, 250
+		openCloseGrapper.setStallThreshold(5, 250); 
 
 		openCloseGrapper.rotate(-900, true);
 		
@@ -121,11 +119,8 @@ public class PeripheralDevices {
 	public void upGrapper() {
 
 		// Change speed to match rotation duration
-		openCloseGrapper.setSpeed(175); //før 90
+		openCloseGrapper.setSpeed(175); 
 		upDownGrapper.setSpeed(360);
-		
-		//openCloseGrapper.flt();
-		//Delay.msDelay(10);
 
 		openCloseGrapper.setStallThreshold(10, 250);
 		
@@ -141,7 +136,7 @@ public class PeripheralDevices {
 	
 	public void upGrapperOnly() {
 
-		openCloseGrapper.setSpeed(175); //før 90
+		openCloseGrapper.setSpeed(175); 
 		upDownGrapper.setSpeed(360);
 
 		upDownGrapper.rotate(550);		
@@ -188,20 +183,6 @@ public class PeripheralDevices {
 
 	}
 	
-	
-	public void grapperPulse() {
-
-		openCloseGrapper.setStallThreshold(80, 100);
-		
-		while(!openCloseGrapper.isStalled()) {
-			
-			openGrapperVar(-150, false);			
-			openGrapperVar(100, false);
-			
-		}
-	}
-		
-
 	private boolean grapperIsDown() {
 
 		float[] sample = new float[1];

@@ -130,7 +130,9 @@ public class MovementController {
 		left.endSynchronization();
 		
 	}
-	
+	/*
+	 * Takes input in degrees and turns to the desired side
+	 */
 	public void turnLeft(byte degrees) {
 		useGyro = false;
 		int deg = (degrees & 0xFF);
@@ -187,6 +189,7 @@ public class MovementController {
 		left.endSynchronization();
 	}
 	
+	//Emergency stop
 	public void emStop() {
 		left.setAcceleration(10000);
 		right.setAcceleration(10000);
