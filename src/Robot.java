@@ -59,7 +59,7 @@ public class Robot {
 	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
-	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T' };
+	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C'};
 
 	public void run() throws UnknownHostException, IOException {
 
@@ -151,29 +151,34 @@ public class Robot {
 
 					case "F":
 						
-						moveCon.moveForward(arg);
+						moveCon.moveForward(arg, true);
 						break;
 
 					case "f":
-						moveCon.moveForwardFine(arg);
+						moveCon.moveForwardFine(arg, true);
 						break;
 
 					case "B":
-						moveCon.moveBackward(arg, false);
+						moveCon.moveBackward(arg, true);
 						break;
+						
+					case "C":
+						//Calibration case 
+						testScript();
+						break; 
 
 					case "L":
-						moveCon.turnLeft(arg);
+						moveCon.turnLeft(arg, true);
 						break;
 
 					case "R":
-						moveCon.turnRight(arg);
+						moveCon.turnRight(arg, true);
 						break;
 
 					case "S":
 						if (arg == -1) {
 							pd.downGrapper();
-							moveCon.moveForwardFine((byte) 10);
+							moveCon.moveForwardFine((byte) 10, true);
 							while (moveCon.isMoving())
 								;
 							pd.closeGrapper();
@@ -229,7 +234,7 @@ public class Robot {
 
 							float distanceMM = sen.readDistanceAve() * 1000;
 							
-							if(distanceMM < 200) {
+							if(distanceMM < 180) {
 								
 								moveCon.setSpeed(20);
 								moveCon.moveBackward((byte) (180 - distanceMM), false);
@@ -249,7 +254,7 @@ public class Robot {
 			
 							pd.resetTachoOpenClose();
 							
-							for(int i = 0; i < 3; i++) {
+							for(int i = 0; i < 5; i++) {
 			
 								if(sen.readColors()) {
 									tempSave = "gb";
@@ -380,7 +385,7 @@ public class Robot {
 		
 		pd.downGrapper();
 		moveCon.setSpeed(150);
-		moveCon.moveForwardFine(distance);
+		moveCon.moveForwardFine((distance), true);
 		pd.closeGrapper();
 		moveCon.stop();
 		while(moveCon.isMoving());
@@ -401,20 +406,24 @@ public class Robot {
 		//Klo 2 bliver sat lodret
 		pd.downGrapperLittle();  
 		
-		moveCon.moveForwardFine((byte) 15);
+		moveCon.moveForwardFine((byte) 15, true);
 		
 		Delay.msDelay(100);
 		
-		//Klo 2 sat i position til at scoope bold ud
-		pd.downGrapperVar(-25, false); 
+		//Klo 2 sat i position til at scoope/hive bold ud
+		pd.downGrapperVar(-25, true); 
 	
 		Delay.msDelay(100);
 		
-		moveCon.moveBackward((byte) 200, false);
-		while(moveCon.isMoving());
-		
+		moveCon.moveBackward((byte) 200, true);
+	
+		Delay.msDelay(1000);
 		pd.upGrapperLittle();
-
+		
+		while(moveCon.isMoving());
+						
+		//moveCon.turnRight((byte) 120, true);
+		
 	}
 	
 	
@@ -423,7 +432,6 @@ public class Robot {
 		
 		pd.downGrapper();
 		moveCon.setSpeed(150);
-		moveCon.moveForwardFine((byte) 100);
 		pd.closeGrapper();
 		moveCon.stop();
 		pd.upGrapper();
@@ -458,7 +466,7 @@ public class Robot {
 
 		pd.resetTachoOpenClose();
 		
-		for(int i = 0; i < 3; i++) {
+		for(int i = 0; i < 5; i++) {
 
 			if(sen.readColors()) {
 				tempSave = "gb";
@@ -480,7 +488,7 @@ public class Robot {
 	
 	public void runTest() {
 
-		moveCon.moveForward((byte) 40);
+		moveCon.moveForward((byte) 40, true);
 		
 		while(moveCon.isMoving());
 		
@@ -489,7 +497,7 @@ public class Robot {
 	
 	public void gyroTest() {
 		
-		moveCon.moveForward((byte) 100);
+		moveCon.moveForward((byte) 100, true);
 		
 		while(moveCon.isMoving()) {
 			

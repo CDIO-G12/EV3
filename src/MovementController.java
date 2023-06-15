@@ -77,14 +77,14 @@ public class MovementController {
 	/*
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
-	public void moveForwardFine(byte distance) {
+	public void moveForwardFine(byte distance, boolean imediateReturn) {
 		useGyro = false;
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn);
-		right.rotate(degreesToTurn);
+		left.rotate(degreesToTurn, imediateReturn);
+		right.rotate(degreesToTurn, imediateReturn);
 		left.endSynchronization();
 		
 	}
@@ -92,14 +92,14 @@ public class MovementController {
 	/*
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
-	public void moveForward(byte distance) {
+	public void moveForward(byte distance, boolean imediateReturn) {
 		resetGyro();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
 		left.startSynchronization();
-		left.rotate(degreesToTurn*10);
-		right.rotate(degreesToTurn*10);
+		left.rotate(degreesToTurn*10, imediateReturn);
+		right.rotate(degreesToTurn*10, imediateReturn);
 		left.endSynchronization();
 		
 	}
@@ -119,28 +119,28 @@ public class MovementController {
 	/*
 	 * Takes input in degrees and turns to the desired side
 	 */
-	public void turnRight(byte degrees) {
+	public void turnRight(byte degrees, boolean imediateReturn) {
 		useGyro = false;
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 
 		left.startSynchronization();
-		left.rotate(totalDegrees);
-		right.rotate(-totalDegrees);
+		left.rotate(totalDegrees, imediateReturn);
+		right.rotate(-totalDegrees, imediateReturn);
 		left.endSynchronization();
 		
 	}
 	/*
 	 * Takes input in degrees and turns to the desired side
 	 */
-	public void turnLeft(byte degrees) {
+	public void turnLeft(byte degrees, boolean imediateReturn) {
 		useGyro = false;
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 		
 		left.startSynchronization();
-		left.rotate(-totalDegrees);
-		right.rotate(totalDegrees);
+		left.rotate(-totalDegrees, imediateReturn);
+		right.rotate(totalDegrees, imediateReturn);
 		left.endSynchronization();
 		
 	}

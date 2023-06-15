@@ -65,6 +65,7 @@ public class PeripheralDevices {
 
 		openCloseGrapper.forward();
 		while (!openCloseGrapper.isStalled() || i <= 1500) {
+			//Timeout
 			if(i == 500) {
 			    openCloseGrapper.setStallThreshold(7, 100);
 			}
@@ -78,7 +79,8 @@ public class PeripheralDevices {
 		Sound.beepSequenceUp();
 
 	}
-	
+
+	//Not fixed, can be varied for different type of use
 	public void openGrapperVar(int size, boolean imediateReturn) {
 		
 		openCloseGrapper.setAcceleration(2000);
@@ -91,10 +93,12 @@ public class PeripheralDevices {
 		
 	}
 	
+	//Not fixed, can be varied for different type of use
 	public void downGrapperVar(int size, boolean imediateReturn) {
 		
+		//upDownGrapper.setStallThreshold(80, 100);
 		upDownGrapper.setAcceleration(2000);
-		upDownGrapper.setSpeed(720);
+		upDownGrapper.setSpeed(150);
 		
 		upDownGrapper.rotate(size, imediateReturn);
 		
@@ -102,7 +106,8 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 		
 	}
-
+	
+	//openGrapper sequence
 	public void openGrapper() {
 
 		openCloseGrapper.setAcceleration(2000);
@@ -115,7 +120,8 @@ public class PeripheralDevices {
 		resetOpenCloseSpeed();
 
 	}
-
+	
+	//upGrapper sequence
 	public void upGrapper() {
 
 		// Change speed to match rotation duration
@@ -134,11 +140,13 @@ public class PeripheralDevices {
 			
 	}
 	
+	//Only rotate the upGrapper, and not the openCloseGrapper
 	public void upGrapperOnly() {
-
+		
 		openCloseGrapper.setSpeed(175); 
 		upDownGrapper.setSpeed(360);
 
+		//openCloseGrapper.rotate(180, true); //Evt fjern bagefter
 		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		resetOpenCloseSpeed();
@@ -149,9 +157,9 @@ public class PeripheralDevices {
 	
 	public void upGrapperLittle() {
 
-		// Change speed to match rotation duration
+		// Change speed to match rotation duration, but only to the upGrapper
 		upDownGrapper.setSpeed(360);
-		upDownGrapper.rotate(290);		
+		upDownGrapper.rotate(310);		
 		while (upDownGrapper.isMoving());
 		
 		// Reset speed
@@ -159,7 +167,7 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 			
 	}
-
+	
 	public void downGrapper() {
 		upDownGrapper.setSpeed(150);
 		upDownGrapper.setStallThreshold(80, 100);
@@ -172,11 +180,12 @@ public class PeripheralDevices {
 
 	}
 	
+	//Making the second claw to be at vertical, therefore its at a fixed rotation
 	public void downGrapperLittle() {
 		upDownGrapper.setSpeed(150);
 		upDownGrapper.setStallThreshold(80, 100);
 		
-		upDownGrapper.rotate(-290);
+		upDownGrapper.rotate(-285); //-290 før HUSK
 		while(upDownGrapper.isMoving());
 		
 		resetUpDownSpeed();
@@ -198,6 +207,7 @@ public class PeripheralDevices {
 
 	}
 
+	//Making the robot dump 
 	public void poop(byte loop) {
 		for (byte i = 0; i < loop; i++) {
 			upDownGrapper.rotate(500);

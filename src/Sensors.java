@@ -60,11 +60,6 @@ public class Sensors {
 		colorSensor.getRGBMode().fetchSample(sample, 0);
 		
 		
-		//LCD.clear();
-		//LCD.drawString("R: " + sample[0] * 100, 0, 2);
-		//LCD.drawString("G: " + sample[1] * 100, 0, 3);
-		//LCD.drawString("B: " + sample[2] * 100, 0, 4);
-		
 		//Returns if all rgb values are over 0,5, which means it should be a white ball
 		return (sample[0] >= cutoffValue && sample[1] >= cutoffValue && sample[2] >= cutoffValue);
 			
