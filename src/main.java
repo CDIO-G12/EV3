@@ -10,7 +10,7 @@ public class main {
 		
 		// Create Robot object
 		Robot robot = new Robot();
-		robot.cornerGrapper();
+		robot.cornerGrapperTest();
 		Delay.msDelay(5000);
 
 	}

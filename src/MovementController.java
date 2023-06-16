@@ -14,10 +14,9 @@ public class MovementController {
 	
 	private float wheelRadius;
 	private float wheelDistanceRadius;
-	private float wheelCircumference;
-	private float robotCircumference;
-	
+
 	private float turnConversion;
+	private float turnConversionWide;
 	private float distancePrDegree;
 	
 	private int standardAcc = 500;
@@ -60,18 +59,19 @@ public class MovementController {
 
 		// Variables for the small wheel
 		wheelRadius = wheelSize/2;
-		wheelCircumference = (float) (wheelRadius * Math.PI * 2);
+		float wheelCircumference = (float) (wheelRadius * Math.PI * 2);
 		
 		// Variables for the robot as a whole
 		wheelDistanceRadius = wheelDistance / 2;
-		robotCircumference = (float) (wheelDistanceRadius * Math.PI * 2);
+		float robotCircumference = (float) (wheelDistanceRadius * Math.PI * 2);
 		
 		// How far the robot turns when asked to turn 1 degree
 		distancePrDegree = wheelCircumference/360;
 		
 
 		turnConversion = robotCircumference / wheelCircumference;
-		
+
+		turnConversionWide = 2 * robotCircumference / wheelCircumference;
 	}
 	
 	/*
@@ -105,7 +105,7 @@ public class MovementController {
 	}
 	
 	public void moveBackward(byte distance, boolean imediateReturn) {
-		resetGyro();
+		useGyro = false;
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -130,6 +130,17 @@ public class MovementController {
 		left.endSynchronization();
 		
 	}
+	
+	public void turnOnlyRight(byte degrees, boolean imediateReturn) {
+		useGyro = false;
+		int deg = (degrees & 0xFF);
+		int totalDegrees = (int) (deg * turnConversionWide);
+		
+		left.startSynchronization();
+		right.rotate(-totalDegrees, imediateReturn);
+		left.endSynchronization();
+	}
+	
 	/*
 	 * Takes input in degrees and turns to the desired side
 	 */
@@ -145,6 +156,18 @@ public class MovementController {
 		
 	}
 	
+	public void turnOnlyLeft(byte degrees, boolean imediateReturn) {
+		useGyro = false;
+		int deg = (degrees & 0xFF);
+		int totalDegrees = (int) (deg * turnConversionWide);
+		
+		left.startSynchronization();
+		left.rotate(-totalDegrees, imediateReturn);
+		left.endSynchronization();
+		
+	}
+	
+	/*
 	public void turnRightGyro(int degrees) {
 		
 		resetGyro();
@@ -178,6 +201,7 @@ public class MovementController {
 		
 		
 	}
+	*/
 	
 	/*
 	 * Stops motors

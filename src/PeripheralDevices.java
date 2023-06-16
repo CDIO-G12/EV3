@@ -31,31 +31,6 @@ public class PeripheralDevices {
 		this.upDownGrapper.setSpeed(upDownDefaultSpeed);
 
 	}
-	
-	public void calibrateMotors() {
-
-		upDownGrapper.backward();
-		while (!upDownGrapper.isStalled());
-		upDownGrapper.stop();
-		Delay.msDelay(500);
-		upDownGrapper.rotate(400);
-
-		Delay.msDelay(1000);
-
-		this.openCloseGrapper.setStallThreshold(4, 13);
-		openCloseGrapper.forward();
-		while (!openCloseGrapper.isStalled());
-		openCloseGrapper.stop();
-
-		Delay.msDelay(500);
-
-		openGrapper();
-
-		Delay.msDelay(1000);
-
-		Sound.beepSequenceUp();
-
-	}
 
 	public void closeGrapper() {
 		
@@ -79,10 +54,11 @@ public class PeripheralDevices {
 		Sound.beepSequenceUp();
 
 	}
-
+	
 	//Not fixed, can be varied for different type of use
 	public void openGrapperVar(int size, boolean imediateReturn) {
-		
+
+		openCloseGrapper.setStallThreshold(10, 250);
 		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setSpeed(720);
 		
@@ -96,8 +72,8 @@ public class PeripheralDevices {
 	//Not fixed, can be varied for different type of use
 	public void downGrapperVar(int size, boolean imediateReturn) {
 		
-		//upDownGrapper.setStallThreshold(80, 100);
-		upDownGrapper.setAcceleration(2000);
+		upDownGrapper.setStallThreshold(80, 100);
+		upDownGrapper.setAcceleration(360);
 		upDownGrapper.setSpeed(150);
 		
 		upDownGrapper.rotate(size, imediateReturn);
@@ -110,8 +86,8 @@ public class PeripheralDevices {
 	//openGrapper sequence
 	public void openGrapper() {
 
-		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setSpeed(720);
+		openCloseGrapper.setAcceleration(2000);
 		openCloseGrapper.setStallThreshold(5, 250); 
 
 		openCloseGrapper.rotate(-900, true);
@@ -153,7 +129,6 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 		
 	}
-	
 	
 	public void upGrapperLittle() {
 
@@ -258,6 +233,12 @@ public class PeripheralDevices {
 	public boolean openCloseGrapperIsMoving() {
 		
 		return openCloseGrapper.isMoving();
+		
+	}
+	
+	public boolean upDownGrapperIsMoving() {
+		
+		return upDownGrapper.isMoving();
 		
 	}
 	

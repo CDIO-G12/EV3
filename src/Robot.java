@@ -14,6 +14,7 @@ import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.hardware.port.SensorPort;
 import lejos.utility.Delay;
+import lejos.hardware.Battery;
 
 public class Robot {
 
@@ -38,8 +39,8 @@ public class Robot {
 	/*
 	 * Physical sizes on the robot in millimeters
 	 */
-	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website
-	private static final float robotDiagonal = 112.5f;	// Distance between the wheels
+	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website, 43.2f originale dæk, samuel dæk: 36.8f, 
+	private static final float robotDiagonal = 112.5f;	// Distance between the wheels, 112.5f originale dæk, samuel dæk:105f 
 
 	/*
 	 * Public objects
@@ -59,7 +60,7 @@ public class Robot {
 	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
-	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C'};
+	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C', 'r', 'l'};
 
 	public void run() throws UnknownHostException, IOException {
 
@@ -82,7 +83,7 @@ public class Robot {
 	
 					pd.resetTachoOpenClose();
 					
-					for(int i = 0; i < 3; i++) {
+					for(int i = 0; i < 5; i++) {
 							
 						if(sen.readColors()) {
 							tempSave = "gb";
@@ -164,15 +165,23 @@ public class Robot {
 						
 					case "C":
 						//Calibration case 
-						testScript();
+						calibrationScript();
 						break; 
 
 					case "L":
 						moveCon.turnLeft(arg, true);
 						break;
 
+					case "l":
+						moveCon.turnOnlyLeft(arg, true);
+						break;
+						
 					case "R":
 						moveCon.turnRight(arg, true);
+						break;
+					
+					case "r":
+						moveCon.turnOnlyRight(arg, true);
 						break;
 
 					case "S":
@@ -220,13 +229,17 @@ public class Robot {
 						//Case for simple ball
 						if(arg == 0) {
 							
-							pickUp((byte) 80, true);
+							pickUp((byte) 80);
+							outputQueue.add("pb");
+							startPickup = true;
 							break;
 						
 						//Case for semi-difficult ball	
 						} else if(arg == 1) {
 							
-							pickUp((byte) 0, true);
+							pickUp((byte) 0);
+							outputQueue.add("pb");
+							startPickup = true;
 							break;
 						
 						//Case for borderball
@@ -240,51 +253,39 @@ public class Robot {
 								moveCon.moveBackward((byte) (180 - distanceMM), false);
 								
 							}
-							
-							pickUp((byte) 0, false);
+							moveCon.resetSpeed();
+							pickUp((byte) 0);
 							
 							moveCon.moveBackward((byte) 20, false);
 							while(moveCon.isMoving());
 							
-							pd.upGrapper();
-							
-							// Check for ball twice
-							String tempSave = "nb";
-							int openAmount = -900;
-			
-							pd.resetTachoOpenClose();
-							
-							for(int i = 0; i < 5; i++) {
-			
-								if(sen.readColors()) {
-									tempSave = "gb";
-									Sound.beep();
-									break;	
-								}
-								
-								pd.openGrapperVar(-50, false);
-								
-							}
-							
-							pd.openGrapperVarTo(openAmount, true);
-
-							outputQueue.add(tempSave);
 							outputQueue.add("pb");
-							
+							startPickup = true;
 							break;
 							
 						//Case for cornerBall	
 						} else if(arg == 3) {
 							
 							cornerGrapper();
-							
-							break;
-				
-						} else {
-							
-							pd.upGrapper();
+
+							startPickup = true;
+							Delay.msDelay(1000);
+							outputQueue.add("pb");
 							break;
 							
+						} else if (arg == 4) {
+							
+							middleXGrapper();
+							
+							outputQueue.add("pb");
+							startPickup = true;
+							break;
+							
+						}
+						else {
+							
+						pd.upGrapper();
+							break;
 						}	
 					}
 					newCommand = false;
@@ -381,7 +382,7 @@ public class Robot {
 		}
 	}
 	
-	private void pickUp(byte distance, boolean runPickupThread) {
+	private void pickUp(byte distance) {
 		
 		pd.downGrapper();
 		moveCon.setSpeed(150);
@@ -391,44 +392,86 @@ public class Robot {
 		while(moveCon.isMoving());
 		moveCon.resetSpeed();
 		
-		if(runPickupThread) {
-			outputQueue.add("pb");
-			startPickup = true;
-		}
 	}
 	
-	public void cornerGrapper() {
-		
-		pd.downGrapper();
-		
-		pd.upGrapperOnly();
+	public void middleXGrapper() {
 		
 		//Klo 2 bliver sat lodret
-		pd.downGrapperLittle();  
+		//pd.downGrapperLittle();  
 		
-		moveCon.moveForwardFine((byte) 15, true);
+		moveCon.moveForwardFine((byte) 15, false);
 		
-		Delay.msDelay(100);
 		
 		//Klo 2 sat i position til at scoope/hive bold ud
-		pd.downGrapperVar(-25, true); 
-	
-		Delay.msDelay(100);
+		pd.downGrapperVar(-310, false); 
 		
-		moveCon.moveBackward((byte) 200, true);
+		while(pd.upDownGrapperIsMoving());
 	
-		Delay.msDelay(1000);
+		Delay.msDelay(1000); //1000
+		
+		moveCon.moveBackward((byte) 150, false);
+	
+		Delay.msDelay(1000); //1000
 		pd.upGrapperLittle();
 		
 		while(moveCon.isMoving());
-						
-		//moveCon.turnRight((byte) 120, true);
+		
+		moveCon.moveBackward((byte) 100, false);
 		
 	}
 	
+	//test funktion til os
+	public void cornerGrapperTest() {
+		
+		pd.closeGrapper();
+		
+		pd.openGrapperVar(-270, false); 
+		
+		pd.downGrapper();
+		
+		moveCon.moveForwardFine((byte) 50, false);
+		
+		Delay.msDelay(500);
+		
+		pd.openGrapperVar(200, false); 
+		
+		moveCon.moveBackward((byte) 50, true);
+		
+		pd.openGrapperVar(20, false);
+		
+		pd.upGrapper();
+		
+		pd.openGrapper();
+		
+	}
+	
+	public void cornerGrapper() {
+
+		pd.closeGrapper();
+		
+		//Åbner tilpas nok til at kunne fange bold i hjørnet
+		pd.openGrapperVar(-270, false);
+		
+		pd.downGrapper();
+
+		//Kører en smule frem for at grib fat om bolden
+		moveCon.moveForwardFine((byte) 50, false);
+		
+		Delay.msDelay(500);
+		
+		//Lukker så bolden forbliver forrest i kloen
+		pd.openGrapperVar(200, false);
+
+		//Kører tilbage, så kloen ikke længere kan sidde fast i banderne, hvis det nu skulle ske
+		moveCon.moveBackward((byte) 30, true);
+		
+		pd.openGrapperVar(20, false);
+		
+		
+	}
 	
 	//testScript, en del af tjeklisten
-	public void testScript() {
+	public void calibrationScript() {
 		
 		pd.downGrapper();
 		moveCon.setSpeed(150);
@@ -438,7 +481,6 @@ public class Robot {
 		pd.openGrapper();
 		moveCon.resetSpeed();
 		Delay.msDelay(1000);
-		
 		pd.poop((byte) 1);
 		
 	}
@@ -447,51 +489,21 @@ public class Robot {
 		
 		float distanceMM = sen.readDistanceAve() * 1000;
 		
-		if(distanceMM < 200) {
+		if(distanceMM < 180) {
 			
 			moveCon.setSpeed(20);
 			moveCon.moveBackward((byte) (180 - distanceMM), false);
 			
 		}
-		
-		pickUp((byte) 0, false);
+		moveCon.resetSpeed();
+		pickUp((byte) 0);
 		
 		moveCon.moveBackward((byte) 20, false);
+		while(moveCon.isMoving());
 		
 		pd.upGrapper();
 		
-		// Check for ball twice
-		String tempSave = "nb";
-		int openAmount = -900;
-
-		pd.resetTachoOpenClose();
-		
-		for(int i = 0; i < 5; i++) {
-
-			if(sen.readColors()) {
-				tempSave = "gb";
-				Sound.beep();
-				break;	
-			}
-			
-			pd.openGrapperVar(-50, false);
-			
-		}
-		
-		pd.openGrapperVarTo(openAmount, true);
-
-		outputQueue.add(tempSave);
-		
-		Delay.msDelay(2000);
-		
-	}
-	
-	public void runTest() {
-
-		moveCon.moveForward((byte) 40, true);
-		
-		while(moveCon.isMoving());
-		
+		pd.openGrapper();
 		
 	}
 	
@@ -515,6 +527,14 @@ public class Robot {
 			
 		}
 		
+	}
+	
+	public void RAMBO() {
+
+		moveCon.setSpeed(720);
+		moveCon.moveForward((byte) 200, false);
+		
+		while(moveCon.isMoving());
 	}
 	
 }
