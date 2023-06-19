@@ -19,8 +19,8 @@ public class MovementController {
 	private float turnConversionWide;
 	private float distancePrDegree;
 	
-	private int defaultAcc = 500;
-	private int defaultSpeed = 720; //Var 360 før
+	public int defaultAcc = 500;
+	public int defaultSpeed = 720; //Var 360 før
 	
 	private boolean useGyro = false;
 	
@@ -78,9 +78,6 @@ public class MovementController {
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
 	public void moveForwardFine(byte distance, boolean imediateReturn) {
-		useGyro = false;
-		setSpeed(360);
-		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -95,9 +92,6 @@ public class MovementController {
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
 	public void moveForward(byte distance, boolean imediateReturn) {
-		//resetGyro();
-		resetSpeed();
-		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -109,9 +103,6 @@ public class MovementController {
 	}
 	
 	public void moveBackward(byte distance, boolean imediateReturn) {
-		useGyro = false;
-		setSpeed(360);
-		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -126,9 +117,6 @@ public class MovementController {
 	 * Takes input in degrees and turns to the desired side
 	 */
 	public void turnRight(byte degrees, boolean imediateReturn) {
-		useGyro = false;
-		setSpeed(360);
-		resetAcc();
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 
@@ -140,7 +128,6 @@ public class MovementController {
 	}
 	
 	public void turnOnlyRight(byte degrees, boolean imediateReturn) {
-		useGyro = false;
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversionWide);
 		

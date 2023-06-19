@@ -177,14 +177,20 @@ public class Robot {
 
 					case "F":
 						
+						moveCon.setSpeed(moveCon.defaultSpeed);
+						moveCon.setAcc(moveCon.defaultAcc);
 						moveCon.moveForward(arg, true);
 						break;
 
 					case "f":
+						moveCon.setSpeed(360);
+						moveCon.setAcc(moveCon.defaultAcc);
 						moveCon.moveForwardFine(arg, true);
 						break;
 
 					case "B":
+						moveCon.setSpeed(360);
+						moveCon.setAcc(moveCon.defaultAcc);
 						moveCon.moveBackward(arg, true);
 						break;
 						
@@ -207,33 +213,6 @@ public class Robot {
 					
 					case "r":
 						moveCon.turnOnlyRight(arg, true);
-						break;
-
-					case "S":
-						if (arg == -1) {
-							pd.downGrapper();
-							moveCon.moveForwardFine((byte) 10, true);
-							while (moveCon.isMoving())
-								;
-							pd.closeGrapper();
-							pd.upGrapper();
-						}
-						break;
-
-					case "G":
-						if (arg == 1) {
-							pd.closeGrapper();
-						} else {
-							pd.openGrapper();
-						}
-						break;
-
-					case "A":
-						if (arg == 1) {
-							pd.upGrapper();
-						} else {
-							pd.downGrapper();
-						}
 						break;
 
 					case "D":
@@ -279,7 +258,8 @@ public class Robot {
 								moveCon.moveBackward((byte) (180 - distanceMM), false);
 								
 							}
-							moveCon.resetSpeed();
+							
+							// Pickup sets the speed = 150
 							pickUp((byte) 0);
 							
 							moveCon.moveBackward((byte) 20, false);
@@ -304,7 +284,6 @@ public class Robot {
 						} else if (arg == 4) {
 							
 							middleXoutPuller();
-							
 							break;
 							
 						}
@@ -423,6 +402,7 @@ public class Robot {
 	
 	public void middleXoutPuller() {
 		
+		moveCon.setSpeed(150);
 		moveCon.moveForwardFine((byte) 15, false);
 		
 		//SkrabeKlo sat i position til at scoope/hive bold ud
@@ -438,11 +418,14 @@ public class Robot {
 		Delay.msDelay(1000); 
 	
 		//Sætter grapper tilbage, så den er klar til næste opgave
-		pd.upGrapperLittle();
+		//pd.upGrapperLittle();
+		pd.downGrapperVar(310, false);
+		
 		
 		while(moveCon.isMoving());
 		
 		moveCon.moveBackward((byte) 100, false);
+		moveCon.resetSpeed();
 		
 	}
 	
@@ -480,6 +463,7 @@ public class Robot {
 		
 		pd.downGrapper();
 
+		moveCon.setSpeed(150);
 		//Kører en smule frem for at grib fat om bolden
 		moveCon.moveForwardFine((byte) 100, false);
 		
@@ -492,6 +476,7 @@ public class Robot {
 		moveCon.moveBackward((byte) 30, true);
 		
 		pd.openGrapperVar(20, false);
+		moveCon.resetSpeed();
 		
 		
 	}
