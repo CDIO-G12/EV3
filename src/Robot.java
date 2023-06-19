@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import lejos.hardware.Battery;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.MotorPort;
@@ -27,7 +28,6 @@ public class Robot {
 	// Unused sensor
 	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
-	//private static final Port upDownSensor = SensorPort.S2;
 	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
@@ -39,8 +39,8 @@ public class Robot {
 	/*
 	 * Physical sizes on the robot in millimeters
 	 */
-	private static final float wheelDiameter = 43.2f;
-	private static final float robotDiagonal = 100f;
+	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website, 43.2f originale dæk, samuel dæk: 36.8f, 
+	private static final float robotDiagonal = 120f;	// Distance between the wheels, 112.5f originale dæk, samuel dæk:105f 
 
 	/*
 	 * Public objects
@@ -56,11 +56,78 @@ public class Robot {
 	 */
 	private boolean newCommand = false;
 	private boolean stop = false;
+	private boolean pickupRunning = false;
+	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
-	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T' };
+	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C', 'r', 'l'};
 
 	public void run() throws UnknownHostException, IOException {
+
+
+		final Thread tPickup = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(true) {
+					while(!startPickup);
+					startPickup = false;
+					
+					pickupRunning = true;
+				
+					pd.upGrapper();
+	
+					// Check for ball twice
+					String tempSave = "nb";
+					int openAmount = -900;
+	
+					pd.resetTachoOpenClose();
+					
+					int i = 0;
+					
+					while(i < 500) {
+						
+						if(sen.readColors()) {
+							tempSave = "gb";
+							Sound.beepSequenceUp();
+							break;	
+						}
+						
+						if(i % 100 == 0) {
+							pd.openGrapperVar(-50, false);
+						}
+						
+						i++;
+						Delay.msDelay(1);
+						
+					}
+					
+					pd.openGrapperVarTo(openAmount, true);
+					
+					/*
+					for(int i = 0; i < 5; i++) {
+							
+						if(sen.readColors()) {
+							tempSave = "gb";
+							Sound.beepSequenceUp();
+							break;	
+						}
+						
+						pd.openGrapperVar(-50, false);
+						Delay.msDelay(250);
+						
+					}
+					
+					pd.openGrapperVarTo(openAmount, true);
+					*/
+	
+					outputQueue.add(tempSave);
+					pickupRunning = false;
+				
+				}
+			}
+		});
+
 
 		/*
 		 * Checks if command(s) is present If it is we call the appropriate function
@@ -69,13 +136,14 @@ public class Robot {
 
 			@Override
 			public void run() {
-
+				
+		        LCD.drawString(String.format("Battery %d%%", getBatteryPercent()), 1, 3);
+				
 				String[] commands = new String[2];
 				String currentCommand = "";
 				byte arg = 0;
 
 				boolean isMoving = moveCon.isMoving();
-				boolean orange = true;
 
 				while (!stop) {
 					if (isMoving != moveCon.isMoving()) {
@@ -88,9 +156,9 @@ public class Robot {
 						}
 					}
 					
-					if(isMoving) {
+					/*if(isMoving) {
 						moveCon.adjustAngle();
-					}
+					}*/
 					
 					if (!newCommand) {
 						continue;
@@ -109,30 +177,42 @@ public class Robot {
 
 					case "F":
 						
-						moveCon.moveForward(arg);
+						moveCon.moveForward(arg, true);
 						break;
 
 					case "f":
-						moveCon.moveForwardFine(arg);
+						moveCon.moveForwardFine(arg, true);
 						break;
 
 					case "B":
-						moveCon.moveBackward(arg);
+						moveCon.moveBackward(arg, true);
 						break;
+						
+					case "C":
+						//Calibration case 
+						calibrationScript();
+						break; 
 
 					case "L":
-						moveCon.turnLeft(arg);
+						moveCon.turnLeft(arg, true);
 						break;
 
+					case "l":
+						moveCon.turnOnlyLeft(arg, true);
+						break;
+						
 					case "R":
-						moveCon.turnRight(arg);
+						moveCon.turnRight(arg, true);
+						break;
+					
+					case "r":
+						moveCon.turnOnlyRight(arg, true);
 						break;
 
 					case "S":
 						if (arg == -1) {
-							// Skal testes
 							pd.downGrapper();
-							moveCon.moveForwardFine((byte) 10);
+							moveCon.moveForwardFine((byte) 10, true);
 							while (moveCon.isMoving())
 								;
 							pd.closeGrapper();
@@ -169,45 +249,80 @@ public class Robot {
 						}
 						break;
 					case "T":
+						while(pickupRunning);
 						
-						if(arg == 1) {
-							pd.cornerCalibrate();
-						}
+						//Case for simple ball
+						if(arg == 0) {
 							
-						pd.downGrapper();
-						moveCon.setSpeed(100);
-						moveCon.moveForwardFine((byte) 175);
-						pd.closeGrapper();
-						moveCon.stop();
-						while(moveCon.isMoving());
-						moveCon.resetSpeed();
+							pickUp((byte) 80);
+							outputQueue.add("pb");
+							startPickup = true;
+							break;
+						
+						//Case for semi-difficult ball	
+						} else if(arg == 1) {
+							
+							pickUp((byte) 0);
+							outputQueue.add("pb");
+							startPickup = true;
+							break;
+						
+						//Case for borderball
+						} else if(arg == 2) {
+
+							float distanceMM = sen.readDistanceAve() * 1000;
+							
+							//If the robot is too close to the border
+							if(distanceMM < 180) {
+								
+								moveCon.setSpeed(20);
+								moveCon.moveBackward((byte) (180 - distanceMM), false);
+								
+							}
+							moveCon.resetSpeed();
+							pickUp((byte) 0);
+							
+							moveCon.moveBackward((byte) 20, false);
+							while(moveCon.isMoving());
+
+							startPickup = true;
+							Delay.msDelay(1000);
+							outputQueue.add("pb");
+							break;
+							
+						//Case for cornerBall	
+						} else if(arg == 3) {
+							
+							cornerGrapper();
+
+							startPickup = true;
+							Delay.msDelay(1000);
+							outputQueue.add("pb");
+							break;
+							
+						//Case for grapping ball in middle 	
+						} else if (arg == 4) {
+							
+							middleXGrapper();
+							outputQueue.add("pb");
+							startPickup = true;
+							break;
+							
+						}
+						else {
+							
 						pd.upGrapper();
-
-						// Check for ball twice
-						String tempSave;
-						
-						if(sen.checkBall()) {
-							
-							tempSave = "gb";
-						} else {
-							tempSave = "nb";
-						}
-
-						pd.openGrapper();
-
-						outputQueue.add(tempSave);
-						
-						break;
+							break;
+						}	
 					}
-					
 					newCommand = false;
-
 				}
 			}
 		});
 
 		// tnetwork.start();
 		tHandler.start();
+		tPickup.start();
 
 		/*
 		 * Create thread that read commands from TCP connection and stores it in the
@@ -294,114 +409,168 @@ public class Robot {
 		}
 	}
 	
-	public void pickUpSequence() {
+	//Our pickup sequence, whenever robot goes for pickup
+	private void pickUp(byte distance) {
 		
-		for(int i = 0; i < 2; i++) {
-			
-			LCD.drawString("1", 0, 0);
-			pd.downGrapper();
-
-			LCD.drawString("2", 0, 0);
-			moveCon.setSpeed(80);
-			
-
-			LCD.drawString("3", 0, 0);
-			moveCon.moveForwardFine((byte) 250);
-			
-			LCD.drawString("4", 0, 0);
-			pd.closeGrapper();
-			
-			moveCon.stop();
-			
-			moveCon.resetSpeed();
-			
-			pd.upGrapper();
-			
-			if(!sen.checkBall()) {
-				Sound.buzz();
-			} 
-			
-			pd.openGrapper();
-		}
+		pd.downGrapper();
+		moveCon.setSpeed(150);
+		moveCon.moveForwardFine((distance), true);
+		pd.closeGrapper();
+		moveCon.stop();
+		while(moveCon.isMoving());
+		moveCon.resetSpeed();
 		
+	}
+	
+	public void middleXGrapper() {
+		
+		moveCon.moveForwardFine((byte) 15, false);
+		
+		//SkrabeKlo sat i position til at scoope/hive bold ud
+		pd.downGrapperVar(-310, false); 
+		
+		while(pd.upDownGrapperIsMoving());
+	
+		Delay.msDelay(1000);
+		
+		//Gerne kører ud med bolden, eller bare få den ud af middle
+		moveCon.moveBackward((byte) 150, false);
+	
+		Delay.msDelay(1000); 
+	
+		//Sætter grapper tilbage, så den er klar til næste opgave
+		pd.upGrapperLittle();
+		
+		while(moveCon.isMoving());
+		
+		moveCon.moveBackward((byte) 100, false);
+		
+	}
+	
+	//test funktion til os
+	public void cornerGrapperTest() {
+		
+		pd.closeGrapper();
+		
+		pd.openGrapperVar(-270, false); 
+		
+		pd.downGrapper();
+		
+		moveCon.moveForwardFine((byte) 50, false);
+		
+		Delay.msDelay(1000);
+		
+		pd.openGrapperVar(200, false); 
+		
+		moveCon.moveBackward((byte) 50, true);
+		
+		pd.openGrapperVar(20, false);
+		
+		pd.upGrapper();
+		
+		pd.openGrapper();
+		
+	}
+	
+	public void cornerGrapper() {
+
+		pd.closeGrapper();
+		
+		//Åbner tilpas nok til at kunne fange bold i hjørnet
+		pd.openGrapperVar(-270, false);
+		
+		pd.downGrapper();
+
+		//Kører en smule frem for at grib fat om bolden
+		moveCon.moveForwardFine((byte) 100, false);
+		
+		Delay.msDelay(1000);
+		
+		//Lukker så bolden forbliver forrest i kloen
+		pd.openGrapperVar(200, false);
+
+		//Kører tilbage, så kloen ikke længere kan sidde fast i banderne, hvis det nu skulle ske
+		moveCon.moveBackward((byte) 30, true);
+		
+		pd.openGrapperVar(20, false);
+		
+		
+	}
+	
+	//testScript, en del af tjeklisten
+	public void calibrationScript() {
+		
+		pd.downGrapper();
+		moveCon.setSpeed(150);
+		pd.closeGrapper();
+		moveCon.stop();
+		pd.upGrapper();
+		pd.openGrapper();
+		moveCon.resetSpeed();
+		Delay.msDelay(1000);
 		pd.poop((byte) 1);
 		
 	}
 	
-	
-	public void testCorner() {
+	public void testBorders() {
+		//Gets distance in Milimeters
+		float distanceMM = sen.readDistanceAve() * 1000;
 		
-		//pd.openGrapper();
-		moveCon.setSpeed(40);
-		moveCon.moveForwardFine((byte) 250);
-		
-		while(sen.readDistance() > 0.25);
-		
-		moveCon.stop();
-
-		pd.cornerCalibrate();
-		pd.downGrapper();
-		
-		Delay.msDelay(1000);
-		
-		pd.closeGrapper();
-		
-		moveCon.resetSpeed();
-		pd.upGrapper();
-		
-		if(!sen.checkBall()) {
-			Sound.buzz();
+		if(distanceMM < 180) {
+			
+			moveCon.setSpeed(20);
+			moveCon.moveBackward((byte) (180 - distanceMM), false);
+			
 		}
+		moveCon.resetSpeed();
+		pickUp((byte) 0);
 		
-		pd.openGrapper();
-		
-		
-		/*
-		pd.cornerCalibrate();
-		pd.downGrapper();
-		moveCon.setSpeed(80);
-		moveCon.moveForwardFine((byte) 200);
-		pd.closeGrapper();
-		
-		
-		while(sen.readDistance() > 0.19);
-		moveCon.stop();
-		
-		moveCon.moveBackward((byte) 100);
-		
+		moveCon.moveBackward((byte) 20, false);
 		while(moveCon.isMoving());
-		moveCon.resetSpeed();
+		
 		pd.upGrapper();
-
-		// Check for ball twice
-		if(!sen.checkBall()) {
-			Sound.buzz();
-		}
 		
 		pd.openGrapper();
-		*/
+		
 	}
 	
-	public void gyroTest() {
-		
-		moveCon.moveForward((byte) 100);
-		
-		while(moveCon.isMoving()) {
-			
-			moveCon.adjustAngle();
-			
-		}
-	}
-	
+	//Prints the distance on the EV3 brick
 	public void distanceTest() {
 		
 		while(true) {
 			
-			LCD.drawString("Distance: " + sen.readDistance(), 0, 3);
+			LCD.drawString("Distance: " + sen.readDistance() * 100, 0, 3);
 			Delay.msDelay(200);
 			
 		}
 		
+	}
+	
+	//To test the wheels of the robot
+	public void drejeTest() {
+		
+		moveCon.turnRight((byte) 90, false);
+		
+		while(moveCon.isMoving());
+
+		moveCon.turnLeft((byte) 90, false);
+		
+		while(moveCon.isMoving());
+	}
+	
+	 //Gets the battery in percentage on the EV3 brick
+	 public static int getBatteryPercent() {
+		 return (int) (Battery.getVoltage()/10*100);
+		 
+	 }
+	
+	//Makes the robot drive forward with 2 meters, and the max amount of speed 
+	public void RAMBO() {
+
+		moveCon.setSpeed(720);
+		moveCon.moveForward((byte) 200, false);
+		
+		while(moveCon.isMoving());
 	}
 	
 }
