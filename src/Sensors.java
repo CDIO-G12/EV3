@@ -18,7 +18,7 @@ public class Sensors {
 		this.distanceSensor = new EV3UltrasonicSensor(distanceSensor);
 		
 	}
-	
+	//Gets average of distance
 	public float readDistanceAve() {
 
 		float[] samples = new float[5];
@@ -37,7 +37,7 @@ public class Sensors {
         return sum / samples.length;
 		
 	}
-	
+	//Gets distance
 	public float readDistance() {
 		
 		float[] sample = new float[1];
@@ -49,7 +49,7 @@ public class Sensors {
 	}
 		
 	/*
-	 * Reads the different RGB values and returns true if a ball roles past.
+	 * Reads the different RGB values and returns true if a ball rolls past.
 	 */
 	public boolean readColors() {
 		

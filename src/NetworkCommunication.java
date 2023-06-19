@@ -15,8 +15,6 @@ public class NetworkCommunication {
 	private Socket socket;
 	private DataInputStream input;
 	private DataOutputStream output;
-	private boolean newCommand = false;
-	
 	
 	public NetworkCommunication(String ip, int port) {
 		

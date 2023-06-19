@@ -20,7 +20,7 @@ public class MovementController {
 	private float distancePrDegree;
 	
 	private int standardAcc = 500;
-	private int defaultSpeed = 360;
+	private int defaultSpeed = 720; //Var 360 før
 	
 	private boolean useGyro = false;
 	
@@ -93,7 +93,7 @@ public class MovementController {
 	 * Takes the input argument (in millimeters) and moves that distance.
 	 */
 	public void moveForward(byte distance, boolean imediateReturn) {
-		resetGyro();
+		//resetGyro();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		

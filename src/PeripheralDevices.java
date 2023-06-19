@@ -119,7 +119,6 @@ public class PeripheralDevices {
 		openCloseGrapper.setSpeed(175); 
 		upDownGrapper.setSpeed(360);
 
-		//openCloseGrapper.rotate(180, true); //Evt fjern bagefter
 		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		resetOpenCloseSpeed();
@@ -207,7 +206,6 @@ public class PeripheralDevices {
 
 		openCloseGrapper.setStallThreshold(10, 200);
 		openCloseGrapper.rotate(-325);
-		
 		
 	}
 	

@@ -40,7 +40,7 @@ public class Robot {
 	 * Physical sizes on the robot in millimeters
 	 */
 	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website, 43.2f originale dæk, samuel dæk: 36.8f, 
-	private static final float robotDiagonal = 112.5f;	// Distance between the wheels, 112.5f originale dæk, samuel dæk:105f 
+	private static final float robotDiagonal = 120f;	// Distance between the wheels, 112.5f originale dæk, samuel dæk:105f 
 
 	/*
 	 * Public objects
@@ -156,9 +156,9 @@ public class Robot {
 						}
 					}
 					
-					if(isMoving) {
+					/*if(isMoving) {
 						moveCon.adjustAngle();
-					}
+					}*/
 					
 					if (!newCommand) {
 						continue;
@@ -304,7 +304,6 @@ public class Robot {
 						} else if (arg == 4) {
 							
 							middleXGrapper();
-							
 							outputQueue.add("pb");
 							startPickup = true;
 							break;
@@ -459,7 +458,7 @@ public class Robot {
 		
 		moveCon.moveForwardFine((byte) 50, false);
 		
-		Delay.msDelay(500);
+		Delay.msDelay(1000);
 		
 		pd.openGrapperVar(200, false); 
 		
@@ -485,7 +484,7 @@ public class Robot {
 		//Kører en smule frem for at grib fat om bolden
 		moveCon.moveForwardFine((byte) 100, false);
 		
-		Delay.msDelay(500);
+		Delay.msDelay(1000);
 		
 		//Lukker så bolden forbliver forrest i kloen
 		pd.openGrapperVar(200, false);
