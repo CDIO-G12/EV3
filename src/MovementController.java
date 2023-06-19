@@ -297,7 +297,7 @@ public class MovementController {
 			
 		}
 	
-		LCD.drawString("newSpeed: " + newSpeed, 0, 3);
+		//LCD.drawString("newSpeed: " + newSpeed, 0, 3);
 		LCD.drawString("Angle: " + sample, 0, 4);
 		
 	}

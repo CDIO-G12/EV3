@@ -8,13 +8,13 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import lejos.hardware.Battery;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
 import lejos.hardware.port.SensorPort;
 import lejos.utility.Delay;
-import lejos.hardware.Battery;
 
 public class Robot {
 
@@ -83,20 +83,43 @@ public class Robot {
 	
 					pd.resetTachoOpenClose();
 					
-					for(int i = 0; i < 5; i++) {
-							
+					int i = 0;
+					
+					while(i < 500) {
+						
 						if(sen.readColors()) {
 							tempSave = "gb";
-							Sound.beep();
+							Sound.beepSequenceUp();
 							break;	
 						}
 						
-						pd.openGrapperVar(-50, false);
-						Delay.msDelay(100);
+						if(i % 100 == 0) {
+							pd.openGrapperVar(-50, false);
+						}
+						
+						i++;
+						Delay.msDelay(1);
 						
 					}
 					
 					pd.openGrapperVarTo(openAmount, true);
+					
+					/*
+					for(int i = 0; i < 5; i++) {
+							
+						if(sen.readColors()) {
+							tempSave = "gb";
+							Sound.beepSequenceUp();
+							break;	
+						}
+						
+						pd.openGrapperVar(-50, false);
+						Delay.msDelay(250);
+						
+					}
+					
+					pd.openGrapperVarTo(openAmount, true);
+					*/
 	
 					outputQueue.add(tempSave);
 					pickupRunning = false;
@@ -113,7 +136,9 @@ public class Robot {
 
 			@Override
 			public void run() {
-
+				
+		        LCD.drawString(String.format("Battery %d%%", getBatteryPercent()), 1, 3);
+				
 				String[] commands = new String[2];
 				String currentCommand = "";
 				byte arg = 0;
@@ -247,6 +272,7 @@ public class Robot {
 
 							float distanceMM = sen.readDistanceAve() * 1000;
 							
+							//If the robot is too close to the border
 							if(distanceMM < 180) {
 								
 								moveCon.setSpeed(20);
@@ -258,9 +284,10 @@ public class Robot {
 							
 							moveCon.moveBackward((byte) 20, false);
 							while(moveCon.isMoving());
-							
-							outputQueue.add("pb");
+
 							startPickup = true;
+							Delay.msDelay(1000);
+							outputQueue.add("pb");
 							break;
 							
 						//Case for cornerBall	
@@ -273,6 +300,7 @@ public class Robot {
 							outputQueue.add("pb");
 							break;
 							
+						//Case for grapping ball in middle 	
 						} else if (arg == 4) {
 							
 							middleXGrapper();
@@ -382,6 +410,7 @@ public class Robot {
 		}
 	}
 	
+	//Our pickup sequence, whenever robot goes for pickup
 	private void pickUp(byte distance) {
 		
 		pd.downGrapper();
@@ -396,22 +425,21 @@ public class Robot {
 	
 	public void middleXGrapper() {
 		
-		//Klo 2 bliver sat lodret
-		//pd.downGrapperLittle();  
-		
 		moveCon.moveForwardFine((byte) 15, false);
 		
-		
-		//Klo 2 sat i position til at scoope/hive bold ud
+		//SkrabeKlo sat i position til at scoope/hive bold ud
 		pd.downGrapperVar(-310, false); 
 		
 		while(pd.upDownGrapperIsMoving());
 	
-		Delay.msDelay(1000); //1000
+		Delay.msDelay(1000);
 		
+		//Gerne kører ud med bolden, eller bare få den ud af middle
 		moveCon.moveBackward((byte) 150, false);
 	
-		Delay.msDelay(1000); //1000
+		Delay.msDelay(1000); 
+	
+		//Sætter grapper tilbage, så den er klar til næste opgave
 		pd.upGrapperLittle();
 		
 		while(moveCon.isMoving());
@@ -455,7 +483,7 @@ public class Robot {
 		pd.downGrapper();
 
 		//Kører en smule frem for at grib fat om bolden
-		moveCon.moveForwardFine((byte) 50, false);
+		moveCon.moveForwardFine((byte) 100, false);
 		
 		Delay.msDelay(500);
 		
@@ -486,7 +514,7 @@ public class Robot {
 	}
 	
 	public void testBorders() {
-		
+		//Gets distance in Milimeters
 		float distanceMM = sen.readDistanceAve() * 1000;
 		
 		if(distanceMM < 180) {
@@ -507,17 +535,7 @@ public class Robot {
 		
 	}
 	
-	public void gyroTest() {
-		
-		moveCon.moveForward((byte) 100, true);
-		
-		while(moveCon.isMoving()) {
-			
-			moveCon.adjustAngle();
-			
-		}
-	}
-	
+	//Prints the distance on the EV3 brick
 	public void distanceTest() {
 		
 		while(true) {
@@ -529,6 +547,25 @@ public class Robot {
 		
 	}
 	
+	//To test the wheels of the robot
+	public void drejeTest() {
+		
+		moveCon.turnRight((byte) 90, false);
+		
+		while(moveCon.isMoving());
+
+		moveCon.turnLeft((byte) 90, false);
+		
+		while(moveCon.isMoving());
+	}
+	
+	 //Gets the battery in percentage on the EV3 brick
+	 public static int getBatteryPercent() {
+		 return (int) (Battery.getVoltage()/10*100);
+		 
+	 }
+	
+	//Makes the robot drive forward with 2 meters, and the max amount of speed 
 	public void RAMBO() {
 
 		moveCon.setSpeed(720);

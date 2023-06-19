@@ -1,8 +1,6 @@
-import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
@@ -13,7 +11,6 @@ public class PeripheralDevices {
 	 */
 	private RegulatedMotor openCloseGrapper;
 	private RegulatedMotor upDownGrapper;
-	private EV3TouchSensor downSensor;
 	
 	private int openCloseDefaultSpeed = 750;
 	private int upDownDefaultSpeed = 270;	
@@ -51,7 +48,7 @@ public class PeripheralDevices {
 		}
 		openCloseGrapper.stop();
 
-		Sound.beepSequenceUp();
+		//Sound.beepSequenceUp();
 
 	}
 	
@@ -154,26 +151,16 @@ public class PeripheralDevices {
 		resetUpDownSpeed();
 
 	}
-	
-	//Making the second claw to be at vertical, therefore its at a fixed rotation
-	public void downGrapperLittle() {
-		upDownGrapper.setSpeed(150);
-		upDownGrapper.setStallThreshold(80, 100);
-		
-		upDownGrapper.rotate(-285); //-290 før HUSK
-		while(upDownGrapper.isMoving());
-		
-		resetUpDownSpeed();
 
-	}
-	
-	private boolean grapperIsDown() {
+	/*
+    private boolean grapperIsDown() {
 
 		float[] sample = new float[1];
 		downSensor.getTouchMode().fetchSample(sample, 0);
 		return sample[0] != 0.0f;
 
 	}
+	*/
 
 	public void stopPeripherals() {
 
