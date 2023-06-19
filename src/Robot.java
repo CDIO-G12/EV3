@@ -303,9 +303,8 @@ public class Robot {
 						//Case for grapping ball in middle 	
 						} else if (arg == 4) {
 							
-							middleXGrapper();
-							outputQueue.add("pb");
-							startPickup = true;
+							middleXoutPuller();
+							
 							break;
 							
 						}
@@ -422,7 +421,7 @@ public class Robot {
 		
 	}
 	
-	public void middleXGrapper() {
+	public void middleXoutPuller() {
 		
 		moveCon.moveForwardFine((byte) 15, false);
 		

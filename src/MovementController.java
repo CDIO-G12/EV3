@@ -19,7 +19,7 @@ public class MovementController {
 	private float turnConversionWide;
 	private float distancePrDegree;
 	
-	private int standardAcc = 500;
+	private int defaultAcc = 500;
 	private int defaultSpeed = 720; //Var 360 før
 	
 	private boolean useGyro = false;
@@ -34,8 +34,8 @@ public class MovementController {
 		this.right = new EV3LargeRegulatedMotor(right);
 		this.gyroSensor = new EV3GyroSensor(gyroSensor);
 		
-		this.left.setAcceleration(standardAcc);
-		this.right.setAcceleration(standardAcc);
+		this.left.setAcceleration(defaultAcc);
+		this.right.setAcceleration(defaultAcc);
 		this.right.setSpeed(defaultSpeed);
 		this.left.setSpeed(defaultSpeed);
 		
@@ -79,6 +79,8 @@ public class MovementController {
 	 */
 	public void moveForwardFine(byte distance, boolean imediateReturn) {
 		useGyro = false;
+		setSpeed(360);
+		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -94,6 +96,8 @@ public class MovementController {
 	 */
 	public void moveForward(byte distance, boolean imediateReturn) {
 		//resetGyro();
+		resetSpeed();
+		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -106,6 +110,8 @@ public class MovementController {
 	
 	public void moveBackward(byte distance, boolean imediateReturn) {
 		useGyro = false;
+		setSpeed(360);
+		resetAcc();
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
 		
@@ -121,6 +127,8 @@ public class MovementController {
 	 */
 	public void turnRight(byte degrees, boolean imediateReturn) {
 		useGyro = false;
+		setSpeed(360);
+		resetAcc();
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 
@@ -146,6 +154,8 @@ public class MovementController {
 	 */
 	public void turnLeft(byte degrees, boolean imediateReturn) {
 		useGyro = false;
+		setSpeed(360);
+		resetAcc();
 		int deg = (degrees & 0xFF);
 		int totalDegrees = (int) (deg * turnConversion);
 		
@@ -223,8 +233,8 @@ public class MovementController {
 		right.stop();
 		left.endSynchronization();
 		
-		this.left.setAcceleration(standardAcc);
-		this.right.setAcceleration(standardAcc);
+		this.left.setAcceleration(defaultAcc);
+		this.right.setAcceleration(defaultAcc);
 	}
 	
 	public void setSpeed(int speed) {
