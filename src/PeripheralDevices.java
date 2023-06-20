@@ -14,7 +14,6 @@ public class PeripheralDevices {
 	
 	private int openCloseDefaultSpeed = 750;
 	private int upDownDefaultSpeed = 270;	
-	private int openCloseDefaultAcc = 6000;
 	private int upDownDefaultAcc = 500;
 	
 

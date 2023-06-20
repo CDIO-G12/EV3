@@ -25,7 +25,6 @@ public class Robot {
 	private static final Port rightPort = MotorPort.C;
 	private static final Port openCloseGrapper = MotorPort.D;
 	private static final Port upDownGrapper = MotorPort.A;
-	// Unused sensor
 	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
 
@@ -38,8 +37,8 @@ public class Robot {
 	/*
 	 * Physical sizes on the robot in millimeters
 	 */
-	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website, 43.2f originale dæk, samuel dæk: 36.8f, 
-	private static final float robotDiagonal = 120f;	// Distance between the wheels, 112.5f originale dæk, samuel dæk:105f 
+	private static final float wheelDiameter = 43.2f;	//Pulled from LEGO website, 43.2f originale dæk 
+	private static final float robotDiagonal = 120f;	// Distance between the wheels, 112.5f originale dæk 
 
 	/*
 	 * Public objects
@@ -401,32 +400,6 @@ public class Robot {
 		moveCon.resetSpeed();
 		
 	}
-	/*
-	//test funktion til os
-	public void cornerGrapperTest() {
-		
-		pd.closeGrapper();
-		
-		pd.openGrapperVar(-270, false); 
-		
-		pd.downGrapper();
-		
-		moveCon.moveForwardFine((byte) 50, false);
-		
-		Delay.msDelay(1000);
-		
-		pd.openGrapperVar(200, false); 
-		
-		moveCon.moveBackward((byte) 50, true);
-		
-		pd.openGrapperVar(20, false);
-		
-		pd.upGrapper();
-		
-		pd.openGrapper();
-		
-	}
-	*/
 	
 	public void cornerGrapper() {
 
@@ -468,43 +441,7 @@ public class Robot {
 		pd.poop((byte) 2);
 		
 	}
-	/*
-	public void testBorders() {
-		//Gets distance in Milimeters
-		float distanceMM = sen.readDistanceAve() * 1000;
-		
-		if(distanceMM < 180) {
-			
-			moveCon.setSpeed(20);
-			moveCon.moveBackward((byte) (180 - distanceMM), false);
-			
-		}
-		moveCon.resetSpeed();
-		pickUp((byte) 0);
-		
-		moveCon.moveBackward((byte) 20, false);
-		while(moveCon.isMoving());
-		
-		pd.upGrapper();
-		
-		pd.openGrapper();
-		
-	}
-	*/
 	
-	/*
-	//Prints the distance on the EV3 brick
-	public void distanceTest() {
-		
-		while(true) {
-			
-			LCD.drawString("Distance: " + sen.readDistance() * 100, 0, 3);
-			Delay.msDelay(200);
-			
-		}
-		
-	}
-	*/
 	
 	//To test the wheels of the robot
 	public void drejeTest() {
