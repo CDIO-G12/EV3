@@ -1,7 +1,5 @@
-import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.RegulatedMotor;
 
 public class MovementController {
@@ -10,29 +8,24 @@ public class MovementController {
 	private float wheelDistance;
 	private RegulatedMotor left;
 	private RegulatedMotor right;
-	private EV3GyroSensor gyroSensor;
 	
 	private float wheelRadius;
 	private float wheelDistanceRadius;
 
 	private float turnConversion;
-	private float turnConversionWide;
 	private float distancePrDegree;
 	
 	public int defaultAcc = 500;
-	public int defaultSpeed = 720; //Var 360 før
-	
-	private boolean useGyro = false;
+	public int defaultSpeed = 720; 
 	
 	
-	public MovementController(Port left, Port right, Port gyroSensor, float wheelSize, float wheelDistance) {
+	public MovementController(Port left, Port right, float wheelSize, float wheelDistance) {
 		
 		this.wheelSize = wheelSize;
 		this.wheelDistance = wheelDistance;
 		
 		this.left = new EV3LargeRegulatedMotor(left);
 		this.right = new EV3LargeRegulatedMotor(right);
-		this.gyroSensor = new EV3GyroSensor(gyroSensor);
 		
 		this.left.setAcceleration(defaultAcc);
 		this.right.setAcceleration(defaultAcc);
@@ -68,10 +61,7 @@ public class MovementController {
 		// How far the robot turns when asked to turn 1 degree
 		distancePrDegree = wheelCircumference/360;
 		
-
 		turnConversion = robotCircumference / wheelCircumference;
-
-		turnConversionWide = 2 * robotCircumference / wheelCircumference;
 	}
 	
 	/*
@@ -101,7 +91,9 @@ public class MovementController {
 		left.endSynchronization();
 		
 	}
-	
+	/*
+	 * Takes the input argument (in millimeters) and moves that distance.
+	 */
 	public void moveBackward(byte distance, boolean imediateReturn) {
 		int dist = (distance & 0xFF);
 		int degreesToTurn = (int) (dist / distancePrDegree);
@@ -127,20 +119,10 @@ public class MovementController {
 		
 	}
 	
-	public void turnOnlyRight(byte degrees, boolean imediateReturn) {
-		int deg = (degrees & 0xFF);
-		int totalDegrees = (int) (deg * turnConversionWide);
-		
-		left.startSynchronization();
-		right.rotate(-totalDegrees, imediateReturn);
-		left.endSynchronization();
-	}
-	
 	/*
 	 * Takes input in degrees and turns to the desired side
 	 */
 	public void turnLeft(byte degrees, boolean imediateReturn) {
-		useGyro = false;
 		setSpeed(360);
 		resetAcc();
 		int deg = (degrees & 0xFF);
@@ -152,53 +134,6 @@ public class MovementController {
 		left.endSynchronization();
 		
 	}
-	
-	public void turnOnlyLeft(byte degrees, boolean imediateReturn) {
-		useGyro = false;
-		int deg = (degrees & 0xFF);
-		int totalDegrees = (int) (deg * turnConversionWide);
-		
-		left.startSynchronization();
-		left.rotate(-totalDegrees, imediateReturn);
-		left.endSynchronization();
-		
-	}
-	
-	/*
-	public void turnRightGyro(int degrees) {
-		
-		resetGyro();
-		setSpeed(100);
-
-		left.startSynchronization();
-		left.forward();
-		right.backward();
-		left.endSynchronization();
-		
-		while(Math.abs(getGyroAngle()) <= ((float) degrees * 0.95));
-		
-		stop();
-		
-		
-	}
-	
-	public void turnLeftGyro(int degrees) {
-
-		resetGyro();
-		setSpeed(100);
-
-		left.startSynchronization();
-		left.backward();
-		right.forward();
-		left.endSynchronization();
-		
-		while(Math.abs(getGyroAngle()) <= ((float) degrees * 0.95));
-		
-		stop();
-		
-		
-	}
-	*/
 	
 	/*
 	 * Stops motors
@@ -259,61 +194,6 @@ public class MovementController {
 	public boolean isStalled() {
 		
 		return (left.isStalled() || right.isStalled());
-		
-	}
-	
-	public void adjustAngle() {
-		
-		if(!useGyro) return;
-		
-		// Read gyro and apply differnce to wheel speed
-		
-		float sample = getGyroAngle();
-		float newSpeed = 0;
-		
-		if(sample == 0) {
-			
-			resetSpeed();
-			
-			return;
-		}
-		
-		if(sample < 0) {
-			
-			newSpeed = defaultSpeed + (sample * 5);
-			
-			left.setSpeed((int) newSpeed);
-			// Left side to turn slower
-			
-		} else {
-			
-			newSpeed = defaultSpeed - (sample * 5);
-			
-			left.setSpeed(defaultSpeed);
-			// Right side to turn slower
-			
-		}
-	
-		//LCD.drawString("newSpeed: " + newSpeed, 0, 3);
-		LCD.drawString("Angle: " + sample, 0, 4);
-		
-	}
-	
-	public void resetGyro() {
-		
-		gyroSensor.reset();
-		useGyro = true;
-		resetSpeed();
-		
-	}
-	
-	public float getGyroAngle() {
-
-		float[] sample = new float[1];
-
-		gyroSensor.getAngleMode().fetchSample(sample, 0);
-
-		return sample[0];
 		
 	}
 	

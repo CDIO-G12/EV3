@@ -52,7 +52,7 @@ public class PeripheralDevices {
 
 	}
 	
-	//Not fixed, can be varied for different type of use
+	//Not a fixed value, can be varied for different type of use
 	public void openGrapperVar(int size, boolean imediateReturn) {
 
 		openCloseGrapper.setStallThreshold(10, 250);
@@ -66,7 +66,7 @@ public class PeripheralDevices {
 		
 	}
 	
-	//Not fixed, can be varied for different type of use
+	//Not a fixed value, can be varied for different type of use
 	public void downGrapperVar(int size, boolean imediateReturn) {
 		
 		upDownGrapper.setStallThreshold(80, 100);
@@ -151,16 +151,6 @@ public class PeripheralDevices {
 
 	}
 
-	/*
-    private boolean grapperIsDown() {
-
-		float[] sample = new float[1];
-		downSensor.getTouchMode().fetchSample(sample, 0);
-		return sample[0] != 0.0f;
-
-	}
-	*/
-
 	public void stopPeripherals() {
 
 		upDownGrapper.stop();
@@ -171,10 +161,13 @@ public class PeripheralDevices {
 	//Making the robot dump 
 	public void poop(byte loop) {
 		for (byte i = 0; i < loop; i++) {
-			upDownGrapper.rotate(500);
+			upDownGrapper.rotate(500); 
+			while(upDownGrapper.isMoving());
 			Delay.msDelay(1000);
-			upDownGrapper.rotate(-510);
+			upDownGrapper.rotate(-500); 
 		}
+		//For at sikre at robotten er calibrated ordentligt, efter et dump 
+		upDownGrapper.rotate(-10);
 
 	}
 	

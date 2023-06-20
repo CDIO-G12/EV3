@@ -28,7 +28,6 @@ public class Robot {
 	// Unused sensor
 	private static final Port distanceSesnor = SensorPort.S2;
 	private static final Port colorSensor = SensorPort.S3;
-	private static final Port gyroSensor = SensorPort.S1;
 
 	/*
 	 * TCP communication variables
@@ -46,7 +45,7 @@ public class Robot {
 	 * Public objects
 	 */
 	// private NetworkCommunication netComm = new NetworkCommunication(ip, port);
-	private final MovementController moveCon = new MovementController(leftPort, rightPort, gyroSensor, wheelDiameter,
+	private final MovementController moveCon = new MovementController(leftPort, rightPort, wheelDiameter,
 			robotDiagonal);
 	private final PeripheralDevices pd = new PeripheralDevices(openCloseGrapper, upDownGrapper);
 	private final Sensors sen = new Sensors(colorSensor, distanceSesnor);
@@ -60,7 +59,7 @@ public class Robot {
 	private boolean startPickup = false;
 	private Queue<String> commandQueue = new LinkedList<>();
 	private Queue<String> outputQueue = new LinkedList<>();
-	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C', 'r', 'l'};
+	private final char[] validCommands = { 'F', 'f', 'B', 'L', 'R', 'S', 'D', 'G', 'A', 'Z', 'T', 'C'};
 
 	public void run() throws UnknownHostException, IOException {
 
@@ -103,23 +102,6 @@ public class Robot {
 					}
 					
 					pd.openGrapperVarTo(openAmount, true);
-					
-					/*
-					for(int i = 0; i < 5; i++) {
-							
-						if(sen.readColors()) {
-							tempSave = "gb";
-							Sound.beepSequenceUp();
-							break;	
-						}
-						
-						pd.openGrapperVar(-50, false);
-						Delay.msDelay(250);
-						
-					}
-					
-					pd.openGrapperVarTo(openAmount, true);
-					*/
 	
 					outputQueue.add(tempSave);
 					pickupRunning = false;
@@ -155,10 +137,6 @@ public class Robot {
 							outputQueue.add("fm");
 						}
 					}
-					
-					/*if(isMoving) {
-						moveCon.adjustAngle();
-					}*/
 					
 					if (!newCommand) {
 						continue;
@@ -202,17 +180,9 @@ public class Robot {
 					case "L":
 						moveCon.turnLeft(arg, true);
 						break;
-
-					case "l":
-						moveCon.turnOnlyLeft(arg, true);
-						break;
 						
 					case "R":
 						moveCon.turnRight(arg, true);
-						break;
-					
-					case "r":
-						moveCon.turnOnlyRight(arg, true);
 						break;
 
 					case "D":
@@ -422,18 +392,16 @@ public class Robot {
 	
 		Delay.msDelay(1000); 
 	
-		//Sætter grapper tilbage, så den er klar til næste opgave
-		pd.downGrapperVar(310, false);
-		
-		
-		
 		moveCon.moveBackward((byte) 100, false);
 		while(moveCon.isMoving());
+		
+		//Sætter grapper tilbage, så den er klar til næste opgave
+		pd.downGrapperVar(310, false);
 		
 		moveCon.resetSpeed();
 		
 	}
-	
+	/*
 	//test funktion til os
 	public void cornerGrapperTest() {
 		
@@ -458,6 +426,7 @@ public class Robot {
 		pd.openGrapper();
 		
 	}
+	*/
 	
 	public void cornerGrapper() {
 
@@ -491,17 +460,15 @@ public class Robot {
 	public void calibrationScript() {
 		
 		pd.downGrapper();
-		moveCon.setSpeed(150);
 		pd.closeGrapper();
 		moveCon.stop();
 		pd.upGrapper();
 		pd.openGrapper();
-		moveCon.resetSpeed();
 		Delay.msDelay(1000);
-		pd.poop((byte) 1);
+		pd.poop((byte) 2);
 		
 	}
-	
+	/*
 	public void testBorders() {
 		//Gets distance in Milimeters
 		float distanceMM = sen.readDistanceAve() * 1000;
@@ -523,7 +490,9 @@ public class Robot {
 		pd.openGrapper();
 		
 	}
+	*/
 	
+	/*
 	//Prints the distance on the EV3 brick
 	public void distanceTest() {
 		
@@ -535,6 +504,7 @@ public class Robot {
 		}
 		
 	}
+	*/
 	
 	//To test the wheels of the robot
 	public void drejeTest() {
@@ -548,12 +518,6 @@ public class Robot {
 		while(moveCon.isMoving());
 	}
 	
-	 //Gets the battery in percentage on the EV3 brick
-	 public static int getBatteryPercent() {
-		 return (int) (Battery.getVoltage()/10*100);
-		 
-	 }
-	
 	//Makes the robot drive forward with 2 meters, and the max amount of speed 
 	public void RAMBO() {
 
@@ -562,5 +526,11 @@ public class Robot {
 		
 		while(moveCon.isMoving());
 	}
+	
+	 //Gets the battery in percentage on the EV3 brick
+	 public static int getBatteryPercent() {
+		 return (int) (Battery.getVoltage()/10*100);
+		 
+	 }
 	
 }
