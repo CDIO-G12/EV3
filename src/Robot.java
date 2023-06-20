@@ -234,16 +234,16 @@ public class Robot {
 						if(arg == 0) {
 							
 							pickUp((byte) 80);
-							outputQueue.add("pb");
 							startPickup = true;
+							outputQueue.add("pb");
 							break;
 						
 						//Case for semi-difficult ball	
 						} else if(arg == 1) {
 							
-							pickUp((byte) 0);
-							outputQueue.add("pb");
+							pickUp((byte) 1);
 							startPickup = true;
+							outputQueue.add("pb");
 							break;
 						
 						//Case for borderball
@@ -284,6 +284,7 @@ public class Robot {
 						} else if (arg == 4) {
 							
 							middleXoutPuller();
+							outputQueue.add("pb");
 							break;
 							
 						}
@@ -329,11 +330,15 @@ public class Robot {
 				while (!stop) {
 					// Send contents of output queue.
 					if (!outputQueue.isEmpty()) {
+						try {
 						String poll = outputQueue.poll();
 						LCD.drawString(poll, 0, 5);
 						output.writeBytes(poll);
 						output.flush();
 						continue;
+						} catch (NullPointerException e) {
+							LCD.drawString(e.toString(), 0, 5);
+						}
 					}
 
 					// Check a command has been sent
@@ -418,13 +423,13 @@ public class Robot {
 		Delay.msDelay(1000); 
 	
 		//Sætter grapper tilbage, så den er klar til næste opgave
-		//pd.upGrapperLittle();
 		pd.downGrapperVar(310, false);
 		
 		
-		while(moveCon.isMoving());
 		
 		moveCon.moveBackward((byte) 100, false);
+		while(moveCon.isMoving());
+		
 		moveCon.resetSpeed();
 		
 	}
@@ -466,8 +471,9 @@ public class Robot {
 		moveCon.setSpeed(150);
 		//Kører en smule frem for at grib fat om bolden
 		moveCon.moveForwardFine((byte) 100, false);
+		while(moveCon.isMoving());
 		
-		Delay.msDelay(1000);
+		Delay.msDelay(100);
 		
 		//Lukker så bolden forbliver forrest i kloen
 		pd.openGrapperVar(200, false);

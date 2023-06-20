@@ -119,7 +119,7 @@ public class PeripheralDevices {
 		openCloseGrapper.setSpeed(175); 
 		upDownGrapper.setSpeed(360);
 
-		upDownGrapper.rotate(550);		
+		upDownGrapper.rotate(30);		
 		while (upDownGrapper.isMoving());
 		resetOpenCloseSpeed();
 		resetUpDownSpeed();
@@ -173,7 +173,7 @@ public class PeripheralDevices {
 		for (byte i = 0; i < loop; i++) {
 			upDownGrapper.rotate(500);
 			Delay.msDelay(1000);
-			upDownGrapper.rotate(-500);
+			upDownGrapper.rotate(-510);
 		}
 
 	}
