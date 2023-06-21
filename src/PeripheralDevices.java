@@ -101,9 +101,10 @@ public class PeripheralDevices {
 		upDownGrapper.setSpeed(360);
 
 		openCloseGrapper.setStallThreshold(10, 250);
-		
+
+		upDownGrapper.rotate(550, true);
+		Delay.msDelay(500);
 		openCloseGrapper.rotate(-180, true);
-		upDownGrapper.rotate(550);		
 		while (upDownGrapper.isMoving());
 		
 		// Reset speed

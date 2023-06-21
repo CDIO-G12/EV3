@@ -38,16 +38,6 @@ public class MovementController {
 		
 	}
 	
-	public void test() {
-		
-		left.startSynchronization();
-		left.rotate(100);
-		right.rotate(100);
-		left.endSynchronization();
-		
-		
-	}
-	
 	private void setupVariables() {
 
 		// Variables for the small wheel

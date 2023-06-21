@@ -95,10 +95,12 @@ public class Robot {
 							pd.openGrapperVar(-50, false);
 						}
 						
+						
 						i++;
 						Delay.msDelay(1);
 						
 					}
+					openAmount += ((i % 100) * 50);
 					
 					pd.openGrapperVarTo(openAmount, true);
 	
@@ -343,6 +345,10 @@ public class Robot {
 					// Set flags and add command to command queue.
 					newCommand = true;
 					validCommand = false;
+					
+					if(!commandQueue.isEmpty()) {
+						continue;
+					}
 					commandQueue.add(comArg);
 				}
 
@@ -380,22 +386,25 @@ public class Robot {
 		moveCon.moveForwardFine((byte) 15, false);
 		
 		//SkrabeKlo sat i position til at scoope/hive bold ud
-		pd.downGrapperVar(-310, false); 
+		pd.downGrapperVar(-330, false); // -310 før
 		
 		while(pd.upDownGrapperIsMoving());
 	
 		Delay.msDelay(1000);
 		
 		//Gerne kører ud med bolden, eller bare få den ud af middle
-		moveCon.moveBackward((byte) 150, false);
+		moveCon.moveBackward((byte) 200, false);
 	
 		Delay.msDelay(1000); 
-	
-		moveCon.moveBackward((byte) 100, false);
-		while(moveCon.isMoving());
 		
 		//Sætter grapper tilbage, så den er klar til næste opgave
-		pd.downGrapperVar(310, false);
+		pd.downGrapperVar(330, false); // 310 før
+		
+		Delay.msDelay(100);
+	
+		moveCon.moveBackward((byte) 20, false);
+		while(moveCon.isMoving());
+		
 		
 		moveCon.resetSpeed();
 		
@@ -406,7 +415,7 @@ public class Robot {
 		pd.closeGrapper();
 		
 		//Åbner tilpas nok til at kunne fange bold i hjørnet
-		pd.openGrapperVar(-270, false);
+		pd.openGrapperVar(-265, false);
 		
 		pd.downGrapper();
 
@@ -418,7 +427,7 @@ public class Robot {
 		Delay.msDelay(100);
 		
 		//Lukker så bolden forbliver forrest i kloen
-		pd.openGrapperVar(200, false);
+		pd.openGrapperVar(300, false);
 
 		//Kører tilbage, så kloen ikke længere kan sidde fast i banderne, hvis det nu skulle ske
 		moveCon.moveBackward((byte) 30, true);
@@ -431,6 +440,8 @@ public class Robot {
 	
 	//testScript, en del af tjeklisten
 	public void calibrationScript() {
+
+        LCD.drawString(String.format("Battery %d%%", getBatteryPercent()), 1, 3);
 		
 		pd.downGrapper();
 		pd.closeGrapper();
